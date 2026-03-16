@@ -29,6 +29,7 @@ node_modules/
 
 # Eslint cache
 .eslintcache
+settings.json
 
 # MacOS system files
 .DS_Store
