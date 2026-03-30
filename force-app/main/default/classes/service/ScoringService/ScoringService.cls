@@ -58,4 +58,46 @@ public class ScoringService {
         
         return score;
     }
+    
+    public static Integer calculateMarginScore(
+        Margin__c m,
+    Id productId,
+    Id hierarchyId,
+    Id accountId,
+    Id groupAccountId,
+    Id cityId,
+    Id stateId,
+    Id countryId
+    ){
+        Integer score = 0;
+        
+        if(m.Product__c != null){
+            if(m.Product__c != productId) return -1;
+            score += 100;
+        } else if(m.Product_Hierarchy__c != null){
+            if(m.Product_Hierarchy__c != hierarchyId) return -1;
+            score += 80;
+        }
+        
+        if(m.Account__c != null){
+            if(m.Account__c != accountId) return -1;
+            score += 60;
+        } else if(m.Group_Account__c != null){
+            if(m.Group_Account__c != groupAccountId) return -1;
+            score += 40;
+        }
+        
+        if(m.City__c != null){
+            if(m.City__c != cityId) return -1;
+            score += 30;
+        } else if(m.State__c != null){
+            if(m.State__c != stateId) return -1;
+            score += 20;
+        } else if(m.Country__c != null){
+            if(m.Country__c != countryId) return -1;
+            score += 10;
+        }
+        
+        return score;
+    }
 }
