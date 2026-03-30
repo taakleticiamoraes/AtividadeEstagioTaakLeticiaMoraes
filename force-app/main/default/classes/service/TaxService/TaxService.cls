@@ -73,6 +73,7 @@ public class TaxService {
                 item.addError('Order without complete address.');
                 continue;
             }
+            Id stateId = ord.Address__r.City__r.State__c;
             
             Integer bestScore = -1;
             Tax__c bestTax;
