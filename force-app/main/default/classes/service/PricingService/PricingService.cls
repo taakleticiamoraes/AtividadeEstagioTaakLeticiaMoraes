@@ -1,15 +1,26 @@
 public class PricingService {
 
+    public static void validateRequiredParameters(List<OrderItem> items){
+
+        for(OrderItem item : items){
+
+            if(item.Production_Cost__c == null ||
+               item.Shipping_Cost__c == null ||
+               item.Tax_Percentage__c == null ||
+               item.Margin_Percentage__c == null){
+
+                item.addError(
+                    'Não está autorizada a venda deste produto devido a falta de parâmetros, entre em contato o time de pricing.'
+                );
+            }
+        }
+    }
+
     public static void calculatePricing(List<OrderItem> items){
 
         for(OrderItem item : items){
 
-            if(item.Production_Cost__c == null){
-                item.addError('Production cost is required.');
-                continue;
-            }
-
-            Decimal cost = item.Production_Cost__c;
+            Decimal cost = item.Production_Cost__c != null ? item.Production_Cost__c : 0;
             Decimal freight = item.Shipping_Cost__c != null ? item.Shipping_Cost__c : 0;
             Decimal tax = item.Tax_Percentage__c != null ? item.Tax_Percentage__c : 0;
             Decimal margin = item.Margin_Percentage__c != null ? item.Margin_Percentage__c : 0;
@@ -22,10 +33,14 @@ public class PricingService {
             finalPrice = finalPrice.setScale(2);
 
             Decimal discount = 0;
-            if(discount < 0) discount = 0;
 
             if(finalPrice > 0){
                 discount = (finalPrice - sellingPrice) / finalPrice;
+
+                if(discount < 0){
+                    discount = 0;
+                }
+
                 discount = discount.setScale(2);
             }
 

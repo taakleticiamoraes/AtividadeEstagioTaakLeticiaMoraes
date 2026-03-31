@@ -1,4 +1,37 @@
 public class MarginService {
+    public static void validateCategories(List<Margin__c> records){
+        
+        for(Margin__c m : records){
+            
+            CategoryValidation.validateProductCategory(
+                m,
+            m.Product__c,
+            m.Product_Hierarchy__c
+                );
+            
+            if(m.Account__c == null && m.Group_Account__c == null){
+                m.addError('Fill Account OR Group Account.');
+            }
+            
+            if(m.Account__c != null && m.Group_Account__c != null){
+                m.addError('Cannot fill both Account and Group Account.');
+            }
+            
+            Integer filled = 0;
+            
+            if(m.City__c != null) filled++;
+            if(m.State__c != null) filled++;
+            if(m.Country__c != null) filled++;
+            
+            if(filled == 0){
+                m.addError('Fill City OR State OR Country.');
+            }
+            
+            if(filled > 1){
+                m.addError('Only one location field can be filled.');
+            }
+        }
+    }
     
     public static void validateDuplicates(List<Margin__c> records){
         

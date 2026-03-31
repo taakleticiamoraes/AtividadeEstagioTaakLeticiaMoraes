@@ -13,6 +13,7 @@ public class OrderItemTriggerHandler {
         TaxService.applyTax(items);
         FreightService.applyFreight(items);
         MarginService.applyMargin(items);
+        PricingService.validateRequiredParameters(items);
         PricingService.calculatePricing(items);
     }
 }

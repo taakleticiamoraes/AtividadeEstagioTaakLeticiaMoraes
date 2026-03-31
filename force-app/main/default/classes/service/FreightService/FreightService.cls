@@ -1,5 +1,17 @@
 public class FreightService {
     
+    public static void validateCategories(List<Freight__c> records){
+        
+        for(Freight__c f : records){
+            
+            CategoryValidation.validateProductCategory(
+                f,
+            f.Product__c,
+            f.Product_Hierarchy__c
+                );
+        }
+    }
+    
     public static void validateDuplicates(List<Freight__c> records){
         
         Set<String> keys = new Set<String>();

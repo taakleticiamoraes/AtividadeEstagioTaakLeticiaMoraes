@@ -1,4 +1,21 @@
 public class TaxService {
+    public static void validateCategories(List<Tax__c> records){
+        
+        for(Tax__c t : records){
+            
+            if(t.Product__c == null){
+                t.addError('Product is required.');
+            }
+            
+            if(t.Distribution_Center__c == null){
+                t.addError('Distribution Center is required.');
+            }
+            
+            if(t.State__c == null){
+                t.addError('State is required.');
+            }
+        }
+    }
     
     public static void validateDuplicates(List<Tax__c> newList){
         
