@@ -1,16 +1,23 @@
 public class FreightService {
     
-    public static void validateCategories(List<Freight__c> records){
+    public static void validateObject(List<Freight__c> records){
+    
+    for(Freight__c f : records){
         
-        for(Freight__c f : records){
-            
-            CategoryValidation.validateProductCategory(
-                f,
+        CategoryValidation.validateProductCategory(
+            f,
             f.Product__c,
             f.Product_Hierarchy__c
-                );
-        }
+        );
+
+        CategoryValidation.validateLocationCategory(
+            f,
+            f.City__c,
+            f.State__c,
+            f.Country__c
+        );
     }
+}
     
     public static void validateDuplicates(List<Freight__c> records){
         

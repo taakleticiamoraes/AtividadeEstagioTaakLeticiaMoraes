@@ -1,53 +1,104 @@
 System.debug('===== CLEAN START =====');
 
-// 1. ORDER ITEMS
-delete [SELECT Id FROM OrderItem];
+// função "manual"
+List<SObject> records;
 
-// 2. ORDERS
-delete [SELECT Id FROM Order];
+// ORDER ITEM
+records = [SELECT Id FROM OrderItem];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 3. MARGIN (🔥 ADICIONAR AQUI)
-delete [SELECT Id FROM Margin__c];
+// ORDER
+records = [SELECT Id FROM Order];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 4. TAX
-delete [SELECT Id FROM Tax__c];
+// MARGIN
+records = [SELECT Id FROM Margin__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 5. FREIGHT
-delete [SELECT Id FROM Freight__c];
+// TAX
+records = [SELECT Id FROM Tax__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 6. PRICEBOOK ENTRY
-delete [SELECT Id FROM PricebookEntry WHERE Pricebook2.IsStandard = false];
+// FREIGHT
+records = [SELECT Id FROM Freight__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 7. PRODUCT
-delete [SELECT Id FROM Product2];
+// PRICEBOOK ENTRY
+records = [SELECT Id FROM PricebookEntry WHERE Pricebook2.IsStandard = false];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 8. ADDRESS
-delete [SELECT Id FROM Address__c];
+// PRODUCT
+records = [SELECT Id FROM Product2];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 9. ACCOUNT
-delete [SELECT Id FROM Account WHERE Name LIKE 'Cliente Teste%'];
+// ADDRESS
+records = [SELECT Id FROM Address__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 10. GROUP ACCOUNT
-delete [SELECT Id FROM Group_Account__c];
+// ACCOUNT
+records = [SELECT Id FROM Account WHERE Name LIKE 'Cliente Teste%'];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 11. DISTRIBUTION CENTER
-delete [SELECT Id FROM Distribution_Center__c];
+// GROUP ACCOUNT
+records = [SELECT Id FROM Group_Account__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 12. PAYMENT TERMS
-delete [SELECT Id FROM Payment_Terms__c];
+// DISTRIBUTION CENTER
+records = [SELECT Id FROM Distribution_Center__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 13. CITY
-delete [SELECT Id FROM City__c];
+// PAYMENT TERMS
+records = [SELECT Id FROM Payment_Terms__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 14. STATE
-delete [SELECT Id FROM State__c];
+// CITY
+records = [SELECT Id FROM City__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
-// 15. COUNTRY
-delete [SELECT Id FROM Country__c];
+// STATE
+records = [SELECT Id FROM State__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
+
+// COUNTRY
+records = [SELECT Id FROM Country__c];
+if(!records.isEmpty()){
+    try { delete records; } catch(Exception e){ System.debug(e.getMessage()); }
+}
 
 System.debug('===== CLEAN END =====');
 
 System.debug('===== START TEST =====');
+
+// SUFIXO ÚNICO
+String suffix = String.valueOf(DateTime.now());
 
 // 1. COUNTRY
 Country__c country = new Country__c(Acronym__c = 'BR');
@@ -73,8 +124,7 @@ insert groupAcc;
 
 // 5. ACCOUNT
 Account acc = new Account(
-    Name = 'Cliente Teste',
-    ShippingState = 'SP',
+    Name = 'Cliente Teste ' + suffix,
     CNPJ__c = '12345678000199',
     Group_Account__c = groupAcc.Id
 );
@@ -104,7 +154,7 @@ insert hierarchy;
 
 // 10. PRODUCT
 Product2 prod = new Product2(
-    Name = 'Produto Teste',
+    Name = 'Produto Teste ' + suffix,
     IsActive = true,
     Product_Hierarchy__c = hierarchy.Id
 );
@@ -129,7 +179,7 @@ insert pbe;
 
 // 13. ORDER
 Order ord = new Order(
-    Name = 'Pedido Teste',
+    Name = 'Pedido Teste ' + suffix,
     AccountId = acc.Id,
     EffectiveDate = Date.today(),
     Status = 'Draft',
@@ -157,41 +207,35 @@ Freight__c freight = new Freight__c(
     Product__c = prod.Id,
     Distribution_Center__c = dc.Id,
     City__c = city.Id,
-    State__c = state.Id,
     Country__c = country.Id,
     Status__c = 'Approved',
     Value__c = 25
 );
 insert freight;
-// =========================
-// 16 MARGIN
-// =========================
+
+// 16. MARGIN
 Margin__c margin = new Margin__c(
-    Product__c = prod.Id, 
-    Account__c = acc.Id, 
+    Account__c = acc.Id,
+    Product__c = prod.Id,
     Distribution_Center__c = dc.Id,
-    City__c = city.Id,
     State__c = state.Id,
-    Country__c = country.Id,
     Status__c = 'Approved',
     Value__c = 20
 );
 insert margin;
 
-System.debug('Margin Created: ' + margin.Id);
-
-// 16. ORDER ITEM
+// 17. ORDER ITEM
 OrderItem item = new OrderItem(
     OrderId = ord.Id,
     PricebookEntryId = pbe.Id,
     Quantity = 1,
     UnitPrice = 100,
-    Selling_Price__c = 100,
-    Production_Cost__c = 50 
+    Selling_Price__c = 90,
+    Production_Cost__c = 50
 );
 insert item;
 
-// 17. VALIDAR RESULTADO
+// 18. VALIDAR RESULTADO
 item = [
     SELECT Id,
            Tax_Percentage__c,
@@ -205,11 +249,15 @@ item = [
 ];
 
 System.debug('===== RESULT =====');
-System.debug('Tax: ' + item.Tax_Percentage__c);
-System.debug('Freight: ' + item.Shipping_Cost__c);
-System.debug('Margin: ' + item.Margin_Percentage__c);
-System.debug('Price without margin: ' + item.Price_without_margin__c);
-System.debug('Final Price: ' + item.Final_Price__c);
-System.debug('Discount: ' + item.Discount__c);
+System.debug(JSON.serializePretty(item));
+
+if(item.Tax_Percentage__c == null ||
+   item.Shipping_Cost__c == null ||
+   item.Margin_Percentage__c == null){
+
+    System.debug('ERRO: Parâmetros não aplicados corretamente');
+}else{
+    System.debug('Pricing aplicado com sucesso');
+}
 
 System.debug('===== END TEST =====');
