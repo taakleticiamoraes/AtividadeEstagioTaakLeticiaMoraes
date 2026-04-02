@@ -1,10 +1,28 @@
 public class OrderTriggerHandler {
 
-    public static void beforeInsert(List<Order> newList){
-        OrderService.validateBeforeInsert(newList);
-    }
+    public static void run(){
 
-    public static void beforeUpdate(List<Order> newList, Map<Id, Order> oldMap){
-        OrderService.validateBeforeUpdate(newList, oldMap);
+        if(Trigger.isBefore){
+
+            if(Trigger.isInsert){
+                OrderService.validateBeforeInsert(
+                    (List<Order>) Trigger.new
+                );
+            }
+
+            if(Trigger.isUpdate){
+                OrderService.validateBeforeUpdate(
+                    (List<Order>) Trigger.new,
+                    (Map<Id, Order>) Trigger.oldMap
+                );
+            }
+        }
+
+        if(Trigger.isAfter && Trigger.isUpdate){
+            OrderService.handleAfterUpdate(
+                (List<Order>) Trigger.new,
+                (Map<Id, Order>) Trigger.oldMap
+            );
+        }
     }
 }

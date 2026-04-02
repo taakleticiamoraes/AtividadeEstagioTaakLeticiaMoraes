@@ -10,7 +10,7 @@ public class PricingService {
                item.Margin_Percentage__c == null){
 
                 item.addError(
-                    'Não está autorizada a venda deste produto devido a falta de parâmetros, entre em contato o time de pricing.'
+                    'The sale of this product is not authorized due to a lack of parameters; please contact the pricing team.'
                 );
             }
         }

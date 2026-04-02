@@ -14,8 +14,11 @@ public class OrderItemService {
 
             Order ord = orderMap.get(item.OrderId);
 
-            if(ord != null && ord.Status == 'Activated'){
-                item.addError('Não é possível alterar itens de um pedido ativo.');
+            if(!TriggerControl.isRecalculating){
+
+                if(ord != null && ord.Status == 'Activated'){
+                    item.addError('It is not possible to modify items from an activated order.');
+                }
             }
         }
     }
