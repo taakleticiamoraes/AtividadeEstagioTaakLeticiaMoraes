@@ -48,7 +48,7 @@ public class TaxService {
     
     
     public static void applyTax(List<OrderItem> items){
-        
+        System.debug('ENTROU');
         Set<Id> orderIds = new Set<Id>();
         
         for(OrderItem item : items){
@@ -85,6 +85,7 @@ public class TaxService {
             }
             
             Id productId = item.Product2Id;
+            System.debug('Produto: ' + productId);
             Id dcId = ord.Distribution_Center__c;
             if(ord.Address__c == null || ord.Address__r.City__r.State__c == null){
                 item.addError('Order without complete address.');
@@ -92,27 +93,32 @@ public class TaxService {
             }
             Id stateId = ord.Address__r.City__r.State__c;
             
+            
             Integer bestScore = -1;
             Tax__c bestTax;
             
             for(Tax__c tax : taxes){
                 
-                Integer score = ScoringService.calculateTaxScore(
-                    tax, productId, dcId, stateId
-                    );
-                
-                if(score > bestScore && score >= 0){
-                    bestScore = score;
-                    bestTax = tax;
+                if(tax.Product__c == productId){
+                    if(tax.Distribution_Center__c == dcId){
+                        if(tax.State__c == stateId){
+                                item.Tax_Percentage__c = tax.Tax_on_cost__c;
+                        }
+                    }
                 }
+                
+                if(tax.State__c != stateId){
+                    continue;
+                }
+                
             }
             
-            if(bestTax == null){
+            /*if(bestTax == null){
                 item.addError('No tax found.');
                 continue;
             }
             
-            item.Tax_Percentage__c = bestTax.Tax_on_cost__c;
+            item.Tax_Percentage__c = bestTax.Tax_on_cost__c;*/
         }
     }
 }

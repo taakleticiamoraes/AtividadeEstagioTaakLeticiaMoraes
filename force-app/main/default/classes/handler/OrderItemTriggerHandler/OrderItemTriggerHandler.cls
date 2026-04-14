@@ -15,6 +15,7 @@ public class OrderItemTriggerHandler {
         for(OrderItem item : items){
             if(item.OrderId != null){
                 orderIds.add(item.OrderId);
+                System.debug(item);
             }
         }
         
@@ -25,12 +26,12 @@ public class OrderItemTriggerHandler {
     ]);
         
         OrderItemService.validateItems(items, orders);
-        PricingService.validateRequiredParameters(items);
         
         TaxService.applyTax(items);
         FreightService.applyFreight(items);
         MarginService.applyMargin(items);
         
         PricingService.calculatePricing(items);
+        PricingService.validateRequiredParameters(items);
     }
 }

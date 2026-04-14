@@ -84,6 +84,20 @@ public class FreightService {
             FROM Freight__c
             WHERE Status__c = 'Approved'
         ];
+
+        set<Id> productIds = new Set<Id>();
+            
+            for(OrderItem oi : items){
+                if(oi.Product2Id != null){
+                    productIds.add(oi.Product2Id);
+                }
+            }
+
+        Map<Id, Product2> products = new Map<Id, Product2>([
+                SELECT Id, Product_Hierarchy__c
+                FROM Product2
+                WHERE Id IN :productIds
+            ]);
         
         for(OrderItem item : items){
             
@@ -108,20 +122,6 @@ public class FreightService {
             
             Integer bestScore = -1;
             Freight__c bestFreight;
-            
-            Set<Id> productIds = new Set<Id>();
-            
-            for(OrderItem oi : items){
-                if(oi.Product2Id != null){
-                    productIds.add(oi.Product2Id);
-                }
-            }
-            
-            Map<Id, Product2> products = new Map<Id, Product2>([
-                SELECT Id, Product_Hierarchy__c
-                FROM Product2
-                WHERE Id IN :productIds
-            ]);
             
             Product2 prod = products.get(item.Product2Id);
             

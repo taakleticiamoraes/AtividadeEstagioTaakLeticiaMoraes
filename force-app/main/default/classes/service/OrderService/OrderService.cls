@@ -74,7 +74,8 @@ public class OrderService {
                 Shipping_Cost__c,
                 Tax_Percentage__c,
                 Margin_Percentage__c,
-                Selling_Price__c
+                Selling_Price__c,
+                Quantity
             FROM OrderItem
             WHERE OrderId IN :orderIds
         ];

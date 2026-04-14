@@ -1,24 +1,4 @@
 public class ScoringService {
-    
-    public static Integer calculateTaxScore(
-        Tax__c tax,
-    Id productId,
-    Id dcId,
-    Id stateId
-    ){
-        if(tax.Product__c != productId) return -1;
-        if(tax.Distribution_Center__c != dcId) return -1;
-        if(tax.State__c != stateId) return -1;
-        
-        Integer score = 0;
-        score += 100;
-        score += 50;
-        score += 20;
-        
-        return score;
-    }
-    
-    
     public static Integer calculateFreightScore(
         Freight__c fr,
     Id productId,
@@ -71,7 +51,7 @@ public class ScoringService {
     ){
         Integer score = 0;
         
-        if(m.Product__c != null){
+        if(m.Product__c != null){ //deixar o nome inteiro
             if(m.Product__c != productId) return -1;
             score += 100;
         } else if(m.Product_Hierarchy__c != null){
