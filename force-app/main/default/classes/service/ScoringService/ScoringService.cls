@@ -1,5 +1,5 @@
 public class ScoringService {
-    public static Integer calculatefreighteightScore(
+    public static Integer calculateFreightScore(
         Freight__c freight,
     Id productId,
     Id hierarchyId,
@@ -51,7 +51,7 @@ public class ScoringService {
     ){
         Integer score = 0;
         
-        if(margin.Product__c != null){ //deixar o nome inteiro
+        if(margin.Product__c != null){
             if(margin.Product__c != productId) return -1;
             score += 100;
         } else if(margin.Product_Hierarchy__c != null){

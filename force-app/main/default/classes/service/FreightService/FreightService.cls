@@ -145,16 +145,16 @@ public class FreightService {
                 
                 if(score >= 0 && score > bestScore){
                     bestScore = score;
-                    bestFreight = fr;
+                    bestFreight = freight;
                 }
             }
             
             if(bestFreight == null){
-                item.addError('No freight found.');
+                orderItem.addError('No freight found.');
                 continue;
             }
             
-            item.Shipping_Cost__c = bestFreight.Value__c;
+            orderItem.Shipping_Cost__c = bestFreight.Value__c;
         }
     }
 }

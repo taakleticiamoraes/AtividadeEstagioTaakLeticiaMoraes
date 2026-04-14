@@ -29,6 +29,7 @@ public class OrderItemTriggerHandler {
                 orderIds.add(item.OrderId);
                 System.debug(item);
             }
+
         }
         
         Map<Id, Order> orders = new Map<Id, Order>([
