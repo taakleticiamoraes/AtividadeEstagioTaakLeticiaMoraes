@@ -1,6 +1,6 @@
 public class ScoringService {
-    public static Integer calculateFreightScore(
-        Freight__c fr,
+    public static Integer calculatefreighteightScore(
+        Freight__c freight,
     Id productId,
     Id hierarchyId,
     Id dcId,
@@ -10,29 +10,29 @@ public class ScoringService {
     ){
         Integer score = 0;
         
-        if(fr.Product__c != null){
-            if(fr.Product__c != productId) return -1;
+        if(freight.Product__c != null){
+            if(freight.Product__c != productId) return -1;
             score += 100;
         }
-        else if(fr.Product_Hierarchy__c != null){
-            if(fr.Product_Hierarchy__c != hierarchyId) return -1;
+        else if(freight.Product_Hierarchy__c != null){
+            if(freight.Product_Hierarchy__c != hierarchyId) return -1;
             score += 50;
         }
         
-        if(fr.Distribution_Center__c != dcId){
+        if(freight.Distribution_Center__c != dcId){
             return -1;
         }
         
-        if(fr.City__c != null){
-            if(fr.City__c != cityId) return -1;
+        if(freight.City__c != null){
+            if(freight.City__c != cityId) return -1;
             score += 30;
         }
-        else if(fr.State__c != null){
-            if(fr.State__c != stateId) return -1;
+        else if(freight.State__c != null){
+            if(freight.State__c != stateId) return -1;
             score += 20;
         }
-        else if(fr.Country__c != null){
-            if(fr.Country__c != countryId) return -1;
+        else if(freight.Country__c != null){
+            if(freight.Country__c != countryId) return -1;
             score += 10;
         }
         
@@ -40,7 +40,7 @@ public class ScoringService {
     }
     
     public static Integer calculateMarginScore(
-        Margin__c m,
+        Margin__c margin,
     Id productId,
     Id hierarchyId,
     Id accountId,
@@ -51,30 +51,30 @@ public class ScoringService {
     ){
         Integer score = 0;
         
-        if(m.Product__c != null){ //deixar o nome inteiro
-            if(m.Product__c != productId) return -1;
+        if(margin.Product__c != null){ //deixar o nome inteiro
+            if(margin.Product__c != productId) return -1;
             score += 100;
-        } else if(m.Product_Hierarchy__c != null){
-            if(m.Product_Hierarchy__c != hierarchyId) return -1;
+        } else if(margin.Product_Hierarchy__c != null){
+            if(margin.Product_Hierarchy__c != hierarchyId) return -1;
             score += 80;
         }
         
-        if(m.Account__c != null){
-            if(m.Account__c != accountId) return -1;
+        if(margin.Account__c != null){
+            if(margin.Account__c != accountId) return -1;
             score += 60;
-        } else if(m.Group_Account__c != null){
-            if(m.Group_Account__c != groupAccountId) return -1;
+        } else if(margin.Group_Account__c != null){
+            if(margin.Group_Account__c != groupAccountId) return -1;
             score += 40;
         }
         
-        if(m.City__c != null){
-            if(m.City__c != cityId) return -1;
+        if(margin.City__c != null){
+            if(margin.City__c != cityId) return -1;
             score += 30;
-        } else if(m.State__c != null){
-            if(m.State__c != stateId) return -1;
+        } else if(margin.State__c != null){
+            if(margin.State__c != stateId) return -1;
             score += 20;
-        } else if(m.Country__c != null){
-            if(m.Country__c != countryId) return -1;
+        } else if(margin.Country__c != null){
+            if(margin.Country__c != countryId) return -1;
             score += 10;
         }
         

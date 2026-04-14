@@ -1,34 +1,34 @@
 public class MarginService {
     public static void validateCategories(List<Margin__c> records){
         
-        for(Margin__c m : records){
+        for(Margin__c margin : records){
             
             CategoryValidation.validateProductCategory(
-                m,
-            m.Product__c,
-            m.Product_Hierarchy__c
+                margin,
+            margin.Product__c,
+            margin.Product_Hierarchy__c
                 );
             
-            if(m.Account__c == null && m.Group_Account__c == null){
-                m.addError('Fill Account OR Group Account.');
+            if(margin.Account__c == null && margin.Group_Account__c == null){
+                margin.addError('Fill Account OR Group Account.');
             }
             
-            if(m.Account__c != null && m.Group_Account__c != null){
-                m.addError('Cannot fill both Account and Group Account.');
+            if(margin.Account__c != null && margin.Group_Account__c != null){
+                margin.addError('Cannot fill both Account and Group Account.');
             }
             
             Integer filled = 0;
             
-            if(m.City__c != null) filled++;
-            if(m.State__c != null) filled++;
-            if(m.Country__c != null) filled++;
+            if(margin.City__c != null) filled++;
+            if(margin.State__c != null) filled++;
+            if(margin.Country__c != null) filled++;
             
             if(filled == 0){
-                m.addError('Fill City OR State OR Country.');
+                margin.addError('Fill City OR State OR Country.');
             }
             
             if(filled > 1){
-                m.addError('Only one location field can be filled.');
+                margin.addError('Only one location field can be filled.');
             }
         }
     }
@@ -37,43 +37,43 @@ public class MarginService {
         
         Set<String> keys = new Set<String>();
         
-        for(Margin__c m : [
+        for(Margin__c margin : [
         SELECT Product__c, Product_Hierarchy__c,
                Account__c, Group_Account__c,
                City__c, State__c, Country__c
         FROM Margin__c
     ]){
-            keys.add(buildKey(m));
+            keys.add(buildKey(margin));
         }
         
-        for(Margin__c m : records){
+        for(Margin__c margin : records){
             
-            if(m.Product__c != null && m.Product_Hierarchy__c != null){
-                m.addError('Cannot fill both Product and Hierarchy.');
+            if(margin.Product__c != null && margin.Product_Hierarchy__c != null){
+                margin.addError('Cannot fill both Product and Hierarchy.');
             }
             
-            if(m.Account__c != null && m.Group_Account__c != null){
-                m.addError('Cannot fill both Account and Group.');
+            if(margin.Account__c != null && margin.Group_Account__c != null){
+                margin.addError('Cannot fill both Account and Group.');
             }
             
-            String key = buildKey(m);
+            String key = buildKey(margin);
             
             if(keys.contains(key)){
-                m.addError('Duplicate margin configuration.');
+                margin.addError('Duplicate margin configuration.');
             }
             
             keys.add(key);
         }
     }
     
-    private static String buildKey(Margin__c m){
-        return String.valueOf(m.Product__c) + '-' +
-            String.valueOf(m.Product_Hierarchy__c) + '-' +
-            String.valueOf(m.Account__c) + '-' +
-            String.valueOf(m.Group_Account__c) + '-' +
-            String.valueOf(m.City__c) + '-' +
-            String.valueOf(m.State__c) + '-' +
-            String.valueOf(m.Country__c);
+    private static String buildKey(Margin__c margin){
+        return String.valueOf(margin.Product__c) + '-' +
+            String.valueOf(margin.Product_Hierarchy__c) + '-' +
+            String.valueOf(margin.Account__c) + '-' +
+            String.valueOf(margin.Group_Account__c) + '-' +
+            String.valueOf(margin.City__c) + '-' +
+            String.valueOf(margin.State__c) + '-' +
+            String.valueOf(margin.Country__c);
     }
     
     public static void applyMargin(List<OrderItem> items){
@@ -98,9 +98,9 @@ public class MarginService {
             WHERE Id IN :orderIds
         ]);
         
-        for(Order o : orders.values()){
-            if(o.AccountId != null){
-                accountIds.add(o.AccountId);
+        for(Order order : orders.values()){
+            if(order.AccountId != null){
+                accountIds.add(order.AccountId);
             }
         }
         
@@ -132,46 +132,46 @@ public class MarginService {
         
         for(OrderItem item : items){
             
-            Order ord = orders.get(item.OrderId);
-            if(ord == null){
+            Order order = orders.get(item.OrderId);
+            if(order == null){
                 item.addError('Order not found.');
                 continue;
             }
             
-            if(ord.Address__c == null || ord.Address__r == null){
+            if(order.Address__c == null || order.Address__r == null){
                 item.addError('Order without address.');
                 continue;
             }
             
             Product2 prod = products.get(item.Product2Id);
-            Account acc = accounts.get(ord.AccountId);
+            Account acc = accounts.get(order.AccountId);
             
             Id hierarchyId = (prod != null) ? prod.Product_Hierarchy__c : null;
             Id groupAccountId = (acc != null) ? acc.Group_Account__c : null;
             
-            Id cityId = ord.Address__r.City__c;
-            Id stateId = ord.Address__r.City__r.State__c;
-            Id countryId = ord.Address__r.City__r.State__r.Country__c;
+            Id cityId = order.Address__r.City__c;
+            Id stateId = order.Address__r.City__r.State__c;
+            Id countryId = order.Address__r.City__r.State__r.Country__c;
             
             Integer bestScore = -1;
             Margin__c bestMargin;
             
-            for(Margin__c m : margins){
+            for(Margin__c margin : margins){
                 
                 Integer score = ScoringService.calculateMarginScore(
-                    m,
-                item.Product2Id,
-                hierarchyId,
-                ord.AccountId,
-                groupAccountId,
-                cityId,
-                stateId,
-                countryId
-                    );
+                    margin,
+                    item.Product2Id,
+                    hierarchyId,
+                    order.AccountId,
+                    groupAccountId,
+                    cityId,
+                    stateId,
+                    countryId
+                );
                 
                 if(score >= 0 && score > bestScore){
                     bestScore = score;
-                    bestMargin = m;
+                    bestMargin = margin;
                 }
             }
             

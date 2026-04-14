@@ -12,11 +12,11 @@ public class OrderItemService {
                 item.addError('Selling price must be greater than zero.');
             }
 
-            Order ord = orderMap.get(item.OrderId);
+            Order order = orderMap.get(item.OrderId);
 
             if(!TriggerControl.isRecalculating){
 
-                if(ord != null && ord.Status == 'Activated'){
+                if(order != null && order.Status == 'Activated'){
                     item.addError('It is not possible to modify items from an activated order.');
                 }
             }

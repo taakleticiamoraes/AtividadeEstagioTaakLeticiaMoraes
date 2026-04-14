@@ -1,55 +1,55 @@
 public class FreightService {
     
     public static void validateObject(List<Freight__c> records){
-    
-    for(Freight__c f : records){
         
-        CategoryValidation.validateProductCategory(
-            f,
-            f.Product__c,
-            f.Product_Hierarchy__c
-        );
-
-        CategoryValidation.validateLocationCategory(
-            f,
-            f.City__c,
-            f.State__c,
-            f.Country__c
-        );
+        for(Freight__c freight : records){
+            
+            CategoryValidation.validateProductCategory(
+            freight,
+            freight.Product__c,
+            freight.Product_Hierarchy__c
+                );
+            
+            CategoryValidation.validateLocationCategory(
+                freight,
+            freight.City__c,
+            freight.State__c,
+            freight.Country__c
+                );
+        }
     }
-}
     
     public static void validateDuplicates(List<Freight__c> records){
         
         Set<String> keys = new Set<String>();
         
-        for(Freight__c f : [
+        for(Freight__c freight : [
         SELECT Product__c, Product_Hierarchy__c, Distribution_Center__c,
                City__c, State__c, Country__c
         FROM Freight__c
     ]){
-            keys.add(buildKey(f));
+            keys.add(buildKey(freight));
         }
         
-        for(Freight__c f : records){
+        for(Freight__c freight : records){
             
-            String key = buildKey(f);
+            String key = buildKey(freight);
             
             if(keys.contains(key)){
-                f.addError('Duplicate freight configuration.');
+                freight.addError('Duplicate freight configuration.');
             }
             
             keys.add(key);
         }
     }
     
-    private static String buildKey(Freight__c f){
-        return String.valueOf(f.Product__c) + '-' +
-            String.valueOf(f.Product_Hierarchy__c) + '-' +
-            String.valueOf(f.Distribution_Center__c) + '-' +
-            String.valueOf(f.City__c) + '-' +
-            String.valueOf(f.State__c) + '-' +
-            String.valueOf(f.Country__c);
+    private static String buildKey(Freight__c freight){
+        return String.valueOf(freight.Product__c) + '-' +
+            String.valueOf(freight.Product_Hierarchy__c) + '-' +
+            String.valueOf(freight.Distribution_Center__c) + '-' +
+            String.valueOf(freight.City__c) + '-' +
+            String.valueOf(freight.State__c) + '-' +
+            String.valueOf(freight.Country__c);
     }
     
     public static void applyFreight(List<OrderItem> items){
@@ -84,46 +84,46 @@ public class FreightService {
             FROM Freight__c
             WHERE Status__c = 'Approved'
         ];
-
+        
         set<Id> productIds = new Set<Id>();
-            
-            for(OrderItem oi : items){
-                if(oi.Product2Id != null){
-                    productIds.add(oi.Product2Id);
-                }
+        
+        for(OrderItem orderItem : items){
+            if(orderItem.Product2Id != null){
+                productIds.add(orderItem.Product2Id);
             }
-
+        }
+        
         Map<Id, Product2> products = new Map<Id, Product2>([
                 SELECT Id, Product_Hierarchy__c
                 FROM Product2
                 WHERE Id IN :productIds
             ]);
         
-        for(OrderItem item : items){
+        for(OrderItem orderItem : items){
             
-            Order ord = orders.get(item.OrderId);
+            Order order = orders.get(orderItem.OrderId);
             
-            if(ord == null){
-                item.addError('Order not found.');
+            if(order == null){
+                orderItem.addError('Order not found.');
                 continue;
             }
             
-            if(ord.Address__c == null || ord.Address__r == null || ord.Address__r.City__c == null){
-                item.addError('Order without complete address.');
+            if(order.Address__c == null || order.Address__r == null || order.Address__r.City__c == null){
+                orderItem.addError('Order without complete address.');
                 continue;
             }
             
-            Id productId = item.Product2Id;
-            Id dcId = ord.Distribution_Center__c;
+            Id productId = orderItem.Product2Id;
+            Id dcId = order.Distribution_Center__c;
             
-            Id cityId = ord.Address__r.City__c;
-            Id stateId = ord.Address__r.City__r.State__c;
-            Id countryId = ord.Address__r.City__r.State__r.Country__c;
+            Id cityId = order.Address__r.City__c;
+            Id stateId = order.Address__r.City__r.State__c;
+            Id countryId = order.Address__r.City__r.State__r.Country__c;
             
             Integer bestScore = -1;
             Freight__c bestFreight;
             
-            Product2 prod = products.get(item.Product2Id);
+            Product2 prod = products.get(orderItem.Product2Id);
             
             Id hierarchyId;
             
@@ -131,10 +131,10 @@ public class FreightService {
                 hierarchyId = prod.Product_Hierarchy__c;
             }
             
-            for(Freight__c fr : freights){
+            for(Freight__c freight : freights){
                 
                 Integer score = ScoringService.calculateFreightScore(
-                    fr,
+                    freight,
                 productId,
                 hierarchyId,
                 dcId,

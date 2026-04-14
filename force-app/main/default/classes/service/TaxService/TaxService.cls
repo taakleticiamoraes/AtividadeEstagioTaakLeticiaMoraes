@@ -1,18 +1,18 @@
 public class TaxService {
     public static void validateCategories(List<Tax__c> records){
         
-        for(Tax__c t : records){
+        for(Tax__c tax : records){
             
-            if(t.Product__c == null){
-                t.addError('Product is required.');
+            if(tax.Product__c == null){
+                tax.addError('Product is required.');
             }
             
-            if(t.Distribution_Center__c == null){
-                t.addError('Distribution Center is required.');
+            if(tax.Distribution_Center__c == null){
+                tax.addError('Distribution Center is required.');
             }
             
-            if(t.State__c == null){
-                t.addError('State is required.');
+            if(tax.State__c == null){
+                tax.addError('State is required.');
             }
         }
     }
@@ -48,7 +48,6 @@ public class TaxService {
     
     
     public static void applyTax(List<OrderItem> items){
-        System.debug('ENTROU');
         Set<Id> orderIds = new Set<Id>();
         
         for(OrderItem item : items){
@@ -77,28 +76,26 @@ public class TaxService {
         
         for(OrderItem item : items){
             
-            Order ord = orders.get(item.OrderId);
+            Order order = orders.get(item.OrderId);
             
-            if(ord == null){
+            if(order == null){
                 item.addError('Order not found.');
                 continue;
             }
             
             Id productId = item.Product2Id;
-            System.debug('Produto: ' + productId);
-            Id dcId = ord.Distribution_Center__c;
-            if(ord.Address__c == null || ord.Address__r.City__r.State__c == null){
+            Id dcId = order.Distribution_Center__c;
+            if(order.Address__c == null || order.Address__r.City__r.State__c == null){
                 item.addError('Order without complete address.');
                 continue;
             }
-            Id stateId = ord.Address__r.City__r.State__c;
+            Id stateId = order.Address__r.City__r.State__c;
             
             
             Integer bestScore = -1;
             Tax__c bestTax;
             
             for(Tax__c tax : taxes){
-                
                 if(tax.Product__c == productId){
                     if(tax.Distribution_Center__c == dcId){
                         if(tax.State__c == stateId){
@@ -106,19 +103,10 @@ public class TaxService {
                         }
                     }
                 }
-                
                 if(tax.State__c != stateId){
                     continue;
                 }
-                
             }
-            
-            /*if(bestTax == null){
-                item.addError('No tax found.');
-                continue;
-            }
-            
-            item.Tax_Percentage__c = bestTax.Tax_on_cost__c;*/
         }
     }
 }

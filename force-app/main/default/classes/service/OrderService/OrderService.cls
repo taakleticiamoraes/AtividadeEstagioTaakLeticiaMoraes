@@ -2,38 +2,38 @@ public class OrderService {
     
     public static void validateBeforeInsert(List<Order> newList){
         
-        for(Order ord : newList){
+        for(Order order : newList){
             
-            if(ord.AccountId == null){
-                ord.addError('Account is required.');
+            if(order.AccountId == null){
+                order.addError('Account is required.');
             }
             
-            if(ord.Address__c == null){
-                ord.addError('Delivery address is required.');
+            if(order.Address__c == null){
+                order.addError('Delivery address is required.');
             }
             
-            if(ord.Distribution_Center__c == null){
-                ord.addError('Distribution Center is required.');
+            if(order.Distribution_Center__c == null){
+                order.addError('Distribution Center is required.');
             }
         }
     }
     
     public static void validateBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap){
         
-        for(Order ord : newList){
+        for(Order order : newList){
             
-            Order old = oldMap.get(ord.Id);
+            Order old = oldMap.get(order.Id);
             
-            if(ord.AccountId != old.AccountId){
-                ord.addError('Account cannot be changed after order creation.');
+            if(order.AccountId != old.AccountId){
+                order.addError('Account cannot be changed after order creation.');
             }
             
             if(old.Status == 'Activated'){
-                ord.addError('Cannot update an activated order.');
+                order.addError('Cannot update an activated order.');
             }
             
-            if(old.Status != 'Activated' && ord.Status == 'Activated'){
-                validateActivation(ord);
+            if(old.Status != 'Activated' && order.Status == 'Activated'){
+                validateActivation(order);
             }
         }
     }
@@ -42,16 +42,16 @@ public class OrderService {
         
         Set<Id> ordersToRecalculate = new Set<Id>();
         
-        for(Order ord : newList){
+        for(Order order : newList){
             
-            Order old = oldMap.get(ord.Id);
+            Order old = oldMap.get(order.Id);
             
             if(
-                ord.Address__c != old.Address__c ||
-                ord.Distribution_Center__c != old.Distribution_Center__c ||
-                ord.Status != old.Status
+                order.Address__c != old.Address__c ||
+                order.Distribution_Center__c != old.Distribution_Center__c ||
+                order.Status != old.Status
             ){
-                ordersToRecalculate.add(ord.Id);
+                ordersToRecalculate.add(order.Id);
             }
         }
         
@@ -96,33 +96,33 @@ public class OrderService {
         TriggerControl.isRecalculating = false;
     }
     
-    private static void validateActivation(Order ord){
+    private static void validateActivation(Order order){
         
-        if(ord.Address__c == null){
-            ord.addError('Cannot activate order without address.');
+        if(order.Address__c == null){
+            order.addError('Cannot activate order without address.');
         }
         
-        if(ord.Distribution_Center__c == null){
-            ord.addError('Cannot activate order without distribution center.');
+        if(order.Distribution_Center__c == null){
+            order.addError('Cannot activate order without distribution center.');
         }
         
         List<OrderItem> items = [
         SELECT Id, Quantity, Selling_Price__c
         FROM OrderItem
-        WHERE OrderId = :ord.Id
+        WHERE OrderId = :order.Id
     ];
         
         if(items.isEmpty()){
-            ord.addError('Cannot activate order without items.');
+            order.addError('Cannot activate order without items.');
         }
         
         for(OrderItem item : items){
             if(item.Quantity <= 0){
-                ord.addError('All items must have quantity greater than zero.');
+                order.addError('All items must have quantity greater than zero.');
             }
             
             if(item.Selling_Price__c <= 0){
-                ord.addError('All items must have a valid selling price.');
+                order.addError('All items must have a valid selling price.');
             }
         }
     }
