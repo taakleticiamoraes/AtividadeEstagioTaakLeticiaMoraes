@@ -130,6 +130,18 @@ public class MarginService {
             WHERE Status__c = 'Approved'
         ];
         
+        applyMarginCore(items, orders, accounts, products, margins);
+    }
+    
+    @TestVisible
+    private static void applyMarginCore(
+        List<OrderItem> items,
+    Map<Id, Order> orders,
+    Map<Id, Account> accounts,
+    Map<Id, Product2> products,
+    List<Margin__c> margins
+    ){
+        
         for(OrderItem item : items){
             
             Order order = orders.get(item.OrderId);
@@ -160,14 +172,14 @@ public class MarginService {
                 
                 Integer score = ScoringService.calculateMarginScore(
                     margin,
-                    item.Product2Id,
-                    hierarchyId,
-                    order.AccountId,
-                    groupAccountId,
-                    cityId,
-                    stateId,
-                    countryId
-                );
+                item.Product2Id,
+                hierarchyId,
+                order.AccountId,
+                groupAccountId,
+                cityId,
+                stateId,
+                countryId
+                    );
                 
                 if(score >= 0 && score > bestScore){
                     bestScore = score;
