@@ -25,6 +25,7 @@ public class PricingService {
             Decimal tax = item.Tax_Percentage__c != null ? item.Tax_Percentage__c : 0;
             Decimal margin = item.Margin_Percentage__c != null ? item.Margin_Percentage__c : 0;
             Decimal sellingPrice = item.Selling_Price__c != null ? item.Selling_Price__c : 0;
+            Decimal quantity = item.Quantity != null ? item.Quantity : 0;
             
             Decimal priceWithoutMargin = (cost + freight) * (1 + (tax / 100));
             priceWithoutMargin = priceWithoutMargin.setScale(2);
@@ -43,7 +44,7 @@ public class PricingService {
             item.Price_without_margin__c = priceWithoutMargin;
             item.Final_Price__c = finalPrice;
             item.Discount__c = discount;
-            item.Total_Price__c = item.Selling_Price__c * item.Quantity;
+            item.Total_Price__c = sellingPrice * quantity;
         }
     }
 }
