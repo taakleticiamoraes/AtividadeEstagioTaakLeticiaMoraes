@@ -96,6 +96,19 @@ public class OrderService {
         TriggerControl.isRecalculating = false;
     }
     
+    @TestVisible
+    static void validateActivationItems(List<OrderItem> items){
+        for(OrderItem item : items){
+            if(item.Quantity <= 0){
+                item.addError('All items must have quantity greater than zero.');
+            }
+            
+            if(item.Selling_Price__c <= 0){
+                item.addError('All items must have a valid selling price.');
+            }
+        }
+    }
+    
     private static void validateActivation(Order order){
         
         if(order.Address__c == null){
@@ -116,14 +129,6 @@ public class OrderService {
             order.addError('Cannot activate order without items.');
         }
         
-        for(OrderItem item : items){
-            if(item.Quantity <= 0){
-                order.addError('All items must have quantity greater than zero.');
-            }
-            
-            if(item.Selling_Price__c <= 0){
-                order.addError('All items must have a valid selling price.');
-            }
-        }
+        validateActivationItems(items);
     }
 }
