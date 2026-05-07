@@ -6,5 +6,8 @@
     "**/.sfdx": true
   },
   "xml.preferences.showSchemaDocumentationType": "none",
-  "salesforce.einsteinForDevelopers.enableAutocompletions": false
+  "salesforce.einsteinForDevelopers.enableAutocompletions": false,
+  "chat.tools.terminal.autoApprove": {
+    "sf": true
+  }
 }
