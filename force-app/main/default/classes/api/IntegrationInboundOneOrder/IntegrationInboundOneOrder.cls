@@ -29,8 +29,11 @@ global with sharing class IntegrationInboundOneOrder {
         
         String endpoint = System.Url.getOrgDomainUrl().toExternalForm() + '/services/apexrest/upsertOneOrder/*';
         Order firstOrder = orderToUpsertList.isEmpty() ? null : orderToUpsertList[0];
+        List<String> externalIdList = String.isNotBlank(orderExternalIds)
+            ? new List<String>(orderExternalIds.split(','))
+            : new List<String>();
         String integrationLogId = IntegrationLog.createLog(
-            'Order', orderExternalIds, 'Inbound', JSON.serialize(orderRequestList), JSON.serialize(orderResponseList), endpoint, hasError, hasDeleted, firstOrder
+            'Order', externalIdList, 'Inbound', JSON.serialize(orderRequestList), JSON.serialize(orderResponseList), '', endpoint, 200, hasError, hasDeleted, firstOrder
             );
         if (integrationLogId != null) updateOrderWithIntegrationLogId(orderToUpsertList, integrationLogId, 'IN');
         
