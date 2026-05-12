@@ -1,6 +1,17 @@
 public with sharing class IntegrationLog {
-    public static Id createLog(String integrationName, String externalIdList, String recordTypeName, String payloadIN, String payloadOUT,
-    String endpoint, Boolean hasAnyErrors, Boolean hasDeleted, Order relatedOrder){
+    public static String createLog(
+        String integrationName,
+    List<String> externalIdList,
+    String recordTypeName,
+    String payloadIN,
+    String payloadOUT,
+    String errorMessage,
+    String endpoint,
+    Integer statusCode,
+    Boolean hasAnyErrors,
+    Boolean hasDeleted,
+    Order relatedOrder
+    ) {
         System.debug('');
         // Se os dados forem maiores que 100.000 TRUE, se não FALSE
         Boolean attachmentIN = (payloadIN.length() > 130000);
@@ -31,16 +42,17 @@ public with sharing class IntegrationLog {
             log.ErrorMessage__c = error.getMessage();
         }
         
-        return log.Id;
+        return (String)log.Id;
     }
     
-    public static IntegrationLog__c createIntegrationLogRecord(String integrationName, String externalIdList, Id recordTypeId,
+    public static IntegrationLog__c createIntegrationLogRecord(String integrationName, List<String> externalIdList, Id recordTypeId,
     String recordTypeName, Boolean attachmentIN, Boolean attachmentOUT, String payloadIN,
     String payloadOUT, String endpoint, Boolean hasAnyErrors, Datetime datetimeNow, Boolean hasDeleted, Order relatedOrder) {
+        String externalIdString = String.join(externalIdList, ', ');
         return new IntegrationLog__c(
             Name = integrationName + ' ' + recordTypeName + ' - ' + (relatedOrder != null ? relatedOrder.ExternalId__c : 'N/A'),
         Endpoint__c = endpoint,
-        ExternalIdList__c = externalIdList.length() > 255 ? externalIdList.substring(0, 256) : externalIdList,
+        ExternalIdList__c = externalIdString.length() > 255 ? externalIdString.substring(0, 256) : externalIdString,
         RecordTypeId = recordTypeId,
         Attachment__c = (attachmentIN || attachmentOUT),
         PayloadIN__c = (attachmentIN  ? '' : payloadIN),
