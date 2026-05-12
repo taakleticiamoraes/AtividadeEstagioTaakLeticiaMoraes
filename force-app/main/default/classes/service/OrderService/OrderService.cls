@@ -19,44 +19,20 @@ public class OrderService {
     }
     
     public static void validateBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap){
-        
         for(Order order : newList){
-            
             Order old = oldMap.get(order.Id);
             
             if(order.AccountId != old.AccountId){
                 order.addError('Account cannot be changed after order creation.');
             }
             
-            if(old.Status == 'Activated'){
+            if(old.Status == 'Activated' && !TriggerControl.ignoreActivatedCheck){
                 order.addError('Cannot update an activated order.');
             }
             
             if(old.Status != 'Activated' && order.Status == 'Activated'){
                 validateActivation(order);
             }
-        }
-    }
-    
-    public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap){
-        
-        Set<Id> ordersToRecalculate = new Set<Id>();
-        
-        for(Order order : newList){
-            
-            Order old = oldMap.get(order.Id);
-            
-            if(
-                order.Address__c != old.Address__c ||
-                order.Distribution_Center__c != old.Distribution_Center__c ||
-                order.Status != old.Status
-            ){
-                ordersToRecalculate.add(order.Id);
-            }
-        }
-        
-        if(!ordersToRecalculate.isEmpty()){
-            recalculateOrderItems(ordersToRecalculate);
         }
     }
     
@@ -130,5 +106,48 @@ public class OrderService {
         }
         
         validateActivationItems(items);
+    }
+    
+    public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap){
+        Set<Id> ordersToRecalculate = new Set<Id>();
+        List<String> ordersToIntegrate = new List<String>();
+        
+        for(Order order : newList){
+            Order old = oldMap.get(order.Id);
+            
+            if(order.Address__c != old.Address__c || order.Distribution_Center__c != old.Distribution_Center__c || order.Status != old.Status){
+                ordersToRecalculate.add(order.Id);
+            }
+            
+            if(old.Status != 'Activated' && order.Status == 'Activated'){
+                ordersToIntegrate.add((String)order.Id);
+            }
+        }
+        
+        if(!ordersToRecalculate.isEmpty()){
+            recalculateOrderItems(ordersToRecalculate);
+        }
+        
+        if(!ordersToIntegrate.isEmpty()){
+            integrateOrders(ordersToIntegrate);
+        }
+    }
+    
+    @future(callout=true)
+    public static void integrateOrders(List<String> orderIds) {
+        try {
+            DataIntegrationFields.CalloutResponse response = CalloutOrder.executeCalloutOrder(orderIds);
+            
+            if (response.hasError) {
+                String msgErro = String.isBlank(response.errorMessage) ?
+                    CalloutOrder.handlerError(response) : response.errorMessage;
+                
+                System.debug('Falha na integração assíncrona: ' + msgErro);
+            } else {
+                System.debug('Sucesso na integração assíncrona dos Pedidos: ' + orderIds);
+            }
+        } catch (Exception e) {
+            System.debug('Erro fatal na integração assíncrona: ' + e.getMessage() + ' - ' + e.getStackTraceString());
+        }
     }
 }
