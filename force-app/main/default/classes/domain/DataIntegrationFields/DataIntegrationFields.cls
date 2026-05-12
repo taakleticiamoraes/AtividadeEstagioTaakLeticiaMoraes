@@ -44,7 +44,7 @@ global with sharing class DataIntegrationFields {
             Delivery_Date__c = Date.valueOf(this.deliveryDate),
             Payment_Terms__r = new Payment_Terms__c(Name = this.paymentTermsName),
             Contract = new Contract(ExternalId__c = this.contractExternalId)
-            );
+                );
         }
         
         public List<String> getRequiredFields() {
@@ -85,11 +85,11 @@ global with sharing class DataIntegrationFields {
         public OrderItem deserialize() {
             OrderItem orderItem = new OrderItem(
                 ExternalId__c	= this.externalId,
-                PricebookEntry		= new PricebookEntry(ExternalId__c = this.pricebookEntryExternalId),
-                Quantity	= this.quantity,
-                UnitPrice		= this.unitPrice,
-                Selling_Price__c		= this.sellingPrice,
-                Production_Cost__c		= this.productionCost
+            PricebookEntry		= new PricebookEntry(ExternalId__c = this.pricebookEntryExternalId),
+            Quantity	= this.quantity,
+            UnitPrice		= this.unitPrice,
+            Selling_Price__c		= this.sellingPrice,
+            Production_Cost__c		= this.productionCost
                 );
             
             if (this.id == null || this.id == '') {
@@ -160,5 +160,135 @@ global with sharing class DataIntegrationFields {
     }
     global class ResponseParent extends Response {
         public List<DataIntegrationFields.Response> items;
+    }
+    
+    public class RequestResponseObject {
+        // Response object, in case the callout was successful.
+        public HttpResponse response;
+        // Boolean that determines if there is an exception or a HttpResponse.
+        public Boolean success;
+        // Exception object, in case there is any.
+        public Exception exceptionObject;
+        
+        public RequestResponseObject(HttpResponse response) {
+            this.success = true;
+            this.response = response;
+            this.exceptionObject = null;
+        }
+        
+        public RequestResponseObject(Exception ex) {
+            this.success = false;
+            this.response = null;
+            this.exceptionObject = ex;
+        }
+    }
+    public class CalloutResponse {
+        public Boolean hasError;
+        public String errorMessage;
+        
+        public ResponseParametersWrapper parsedResponse;
+        public List<ResponseParametersWrapper> parsedResponses;
+        
+        public CalloutResponse(String errorMessage) {
+            this.hasError = true;
+            this.errorMessage = errorMessage;
+        }
+        public CalloutResponse(ResponseParametersWrapper response, Boolean hasError) {
+            this.hasError = hasError;
+            this.errorMessage = '';
+            this.parsedResponse = response;
+        }
+        public CalloutResponse(List<ResponseParametersWrapper> responseList, Boolean hasError) {
+            this.hasError = hasError;
+            this.errorMessage = '';
+            this.parsedResponses = responseList;
+        }
+    }
+    
+    public class ResponseParametersWrapper {
+        public Boolean hasError;
+        public String errorMessage;
+        public String salesforceId;
+        public String externalId;
+        public String sobjectType;
+        
+        public List<ResponseParametersWrapper> items;
+    }
+    
+    public class RequestList {
+        List<OrderParameters> orderRequestList;
+        
+        public RequestList(List<DataIntegrationFields.OrderParameters> orderRequestList) {
+            this.orderRequestList = orderRequestList;
+        }
+    }
+    public class Request {
+        OrderParameters orderRequest;
+        
+        public Request(DataIntegrationFields.OrderParameters orderRequest) {
+            this.orderRequest = orderRequest;
+        }
+    }
+    
+    public class OrderParameters {
+        public String externalId;
+        public String status;
+        public Date effectiveDate;
+        public String accountExternalId;
+        public String pricebook2ExternalId;
+        public String shippingType;
+        public String addressName;
+        public String distributionCenterName;
+        public Date deliveryDate;
+        public String paymentTermsName;
+        public String contractExternalId;
+        
+        public OrderItemParameters[] orderItemList;
+        
+        public OrderParameters(Order order) {
+            this.externalId = 'AGRO_EXTERNAL_INTEGRATION_ORDER_003_ENVIADO';
+            this.status = 'draft';
+            this.effectiveDate = order.EffectiveDate;
+            this.accountExternalId = order.Account.ExternalId__c;
+            this.pricebook2ExternalId = order.Pricebook2.ExternalId__c;
+            this.shippingType = order.Type_of_shipping__c;
+            this.addressName = order.Address__r.CEP__c;
+            this.distributionCenterName = order.Distribution_Center__r.Name;
+            this.deliveryDate = order.Delivery_Date__c;
+            this.paymentTermsName = order.Payment_Terms__r.Name;
+            this.contractExternalId = order.Contract.ExternalId__c;
+            
+            this.orderItemList = new List<OrderItemParameters>();
+            
+            for (OrderItem orderItem : Order.OrderItems)
+                orderItemList.add(new OrderItemParameters(orderItem));
+        }
+    }
+    public class OrderItemParameters {
+        public String id;
+        public String externalId;
+        public Decimal quantity;
+        public String orderExternalId;
+        public Decimal unitPrice;
+        public Decimal sellingPrice;
+        public Decimal productionCost;
+        public String productExternalId;
+        public String pricebookEntryExternalId;
+        
+        public OrderItemParameters(OrderItem orderItem) {
+            this.externalId = orderItem.ExternalId__c;
+            this.quantity = orderItem.Quantity;
+            this.unitPrice = orderItem.UnitPrice;
+            this.orderExternalId = 'AGRO_EXTERNAL_INTEGRATION_ORDER_003_ENVIADO';
+            this.pricebookEntryExternalId = orderItem.PricebookEntry.ExternalId__c;
+            this.sellingPrice = orderItem.Selling_Price__c;
+            this.productionCost = orderItem.Production_Cost__c;
+        }
+    }
+    
+    public class ResponseAccessToken {
+        public String access_token;
+        public String error;
+        public String error_description;
     }
 }
