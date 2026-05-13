@@ -62,7 +62,6 @@ public with sharing class IntegrationLogTest {
     Order testOrder = (Order) sobjectFactory.createSObject(new Order());
     insert testOrder;
 
-    Datetime datetimeNow = System.now();
     String integrationName = 'Order';
     List<String> externalIdList = new List<String>{ '1000', '1001' };
     String recordTypeName = 'Inbound';
@@ -92,7 +91,6 @@ public with sharing class IntegrationLogTest {
 
   @IsTest
   public static void createLogWithNullOrderTest() {
-    Datetime datetimeNow = System.now();
     String integrationName = 'Order';
     List<String> externalIdList = new List<String>{ '1000' };
     String recordTypeName = 'Outbound';
@@ -202,8 +200,6 @@ public with sharing class IntegrationLogTest {
     List<String> externalIdList = new List<String>{ '3000' };
 
     Test.startTest();
-
-    // Test with 201 Created
     String logId1 = IntegrationLog.createLog(
       'Order',
       externalIdList,
@@ -219,7 +215,6 @@ public with sharing class IntegrationLogTest {
     );
     System.assertNotEquals(null, logId1);
 
-    // Test with 401 Unauthorized
     String logId2 = IntegrationLog.createLog(
       'Order',
       externalIdList,
@@ -235,7 +230,6 @@ public with sharing class IntegrationLogTest {
     );
     System.assertNotEquals(null, logId2);
 
-    // Test with 500 Server Error
     String logId3 = IntegrationLog.createLog(
       'Order',
       externalIdList,
@@ -250,7 +244,6 @@ public with sharing class IntegrationLogTest {
       testOrder
     );
     System.assertNotEquals(null, logId3);
-
     Test.stopTest();
   }
 
@@ -280,7 +273,6 @@ public with sharing class IntegrationLogTest {
       testOrder
     );
 
-    // Create attachment with specific parameters
     IntegrationLog.createAttachment(
       logId,
       'OrderIntegration',
@@ -289,7 +281,6 @@ public with sharing class IntegrationLogTest {
       System.now().format('yyyy-MM-dd HH:mm:ss'),
       payloadIN
     );
-
     Test.stopTest();
 
     System.assertNotEquals(
@@ -367,5 +358,89 @@ public with sharing class IntegrationLogTest {
       'Should create log with multiple errors'
     );
     Test.stopTest();
+  }
+
+  @IsTest
+  public static void createLogInvalidRecordTypeTest() {
+    Test.startTest();
+    String logId = IntegrationLog.createLog(
+      'Order',
+      new List<String>{ '9999' },
+      'TIPO_DE_REGISTRO_INEXISTENTE',
+      'Test',
+      'Test',
+      '',
+      '',
+      200,
+      false,
+      false,
+      null
+    );
+    Test.stopTest();
+  }
+
+  @IsTest
+  public static void createLogWithLongExternalIdListTest() {
+    List<String> massiveIds = new List<String>();
+    for (Integer i = 0; i < 17; i++) {
+      massiveIds.add('ID-TESTE-1234');
+    }
+
+    Test.startTest();
+    String logId = IntegrationLog.createLog(
+      'Order',
+      massiveIds,
+      'Inbound',
+      'Test',
+      'Test',
+      '',
+      '',
+      200,
+      false,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    System.assertNotEquals(
+      null,
+      logId,
+      'O log deveria ter sido inserido com sucesso'
+    );
+
+    IntegrationLog__c insertedLog = [
+      SELECT ExternalIdList__c
+      FROM IntegrationLog__c
+      WHERE Id = :logId
+      LIMIT 1
+    ];
+    System.assertNotEquals(null, insertedLog.ExternalIdList__c);
+  }
+
+  @IsTest
+  public static void createLogExceptionCatchTest() {
+    String giantName = 'X'.repeat(100);
+
+    Test.startTest();
+    String logId = IntegrationLog.createLog(
+      giantName,
+      new List<String>{ '123' },
+      'Inbound',
+      'Test',
+      'Test',
+      '',
+      '',
+      200,
+      false,
+      false,
+      null
+    );
+    Test.stopTest();
+
+    System.assertEquals(
+      null,
+      logId,
+      'The logId should return null due to DML failure contained in the catch'
+    );
   }
 }

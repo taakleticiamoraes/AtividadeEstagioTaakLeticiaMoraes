@@ -572,4 +572,40 @@ public class TemplateDefaultFields {
       };
     }
   }
+
+  // =========================
+  // INTEGRATION LOG
+  // =========================
+  public class IntegrationLogDefaults implements FieldDefaults {
+    public Map<String, Object> getFieldDefaults(Decimal count) {
+      Id defaultRecordTypeId = null;
+      List<RecordType> rtypes = [
+        SELECT Id
+        FROM RecordType
+        WHERE
+          SobjectType = 'IntegrationLog__c'
+          AND (DeveloperName = 'Inbound'
+          OR Name = 'Inbound')
+        LIMIT 1
+      ];
+
+      if (!rtypes.isEmpty()) {
+        defaultRecordTypeId = rtypes[0].Id;
+      }
+
+      return new Map<String, Object>{
+        'Name' => 'Log Integracao Teste ' + count,
+        'Endpoint__c' => 'https://api.teste.com/v1/services',
+        'ExternalIdList__c' => 'EXT-TEST-' + count,
+        'RecordTypeId' => defaultRecordTypeId,
+        'Attachment__c' => false,
+        'PayloadIN__c' => '{"status": "simulado_inbound"}',
+        'PayloadOUT__c' => '{"status": "simulado_outbound"}',
+        'ExecutionDate__c' => System.now(),
+        'Status__c' => 'Success',
+        'ErrorMessage__c' => '',
+        'HasDeleted__c' => false
+      };
+    }
+  }
 }
