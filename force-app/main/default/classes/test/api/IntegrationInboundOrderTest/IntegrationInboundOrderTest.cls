@@ -14,7 +14,7 @@ public with sharing class IntegrationInboundOrderTest {
 
     Account acc = (Account) TestFactorySObject.getInstance()
       .createSObject(new Account());
-    acc.Name = 'Cliente Teste ' + timestamp;
+    acc.Name = 'Test Customer ' + timestamp;
     acc.ExternalId__c = 'ACC-TEST-' + timestamp;
     insert acc;
 
@@ -260,7 +260,7 @@ public with sharing class IntegrationInboundOrderTest {
     System.assertEquals(
       1,
       orders.size(),
-      'O pedido do setup precisa existir no banco'
+      'The setup order must exist in the database'
     );
 
     IntegrationLog__c fakeLog = (IntegrationLog__c) TestFactorySObject.getInstance()
