@@ -130,7 +130,7 @@ public class TemplateDefaultFields {
       String seq = String.valueOf(randomNum).leftPad(14, '0').substring(0, 14);
 
       return new Map<String, Object>{
-        'Name' => 'Cliente Teste ' + count,
+        'Name' => 'Test Customer ' + count,
         'CNPJ__c' => seq,
         'Group_Account__c' => groupAcc.Id
       };
@@ -196,7 +196,7 @@ public class TemplateDefaultFields {
       return new Map<String, Object>{
         'Account__c' => acc.Id,
         'City__c' => city.Id,
-        'Street__c' => 'Rua Teste ' + count,
+        'Street__c' => 'Test Street ' + count,
         'CEP__c' => '00000000',
         'Neighborhood__c' => 'Centro'
       };
@@ -257,7 +257,7 @@ public class TemplateDefaultFields {
       insert acc;
 
       return new Map<String, Object>{
-        'Name' => 'Pedido ' + count,
+        'Name' => 'Order ' + count,
         'Address__c' => add.Id,
         'AccountId' => acc.Id,
         'Status' => 'Draft',
@@ -594,8 +594,8 @@ public class TemplateDefaultFields {
       }
 
       return new Map<String, Object>{
-        'Name' => 'Log Integracao Teste ' + count,
-        'Endpoint__c' => 'https://api.teste.com/v1/services',
+        'Name' => 'Integration Log Test ' + count,
+        'Endpoint__c' => 'https://api.test.com/v1/services',
         'ExternalIdList__c' => 'EXT-TEST-' + count,
         'RecordTypeId' => defaultRecordTypeId,
         'Attachment__c' => false,
