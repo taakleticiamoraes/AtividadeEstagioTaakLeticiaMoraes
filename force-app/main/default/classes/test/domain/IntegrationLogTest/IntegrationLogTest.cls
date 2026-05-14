@@ -383,7 +383,7 @@ public with sharing class IntegrationLogTest {
   public static void createLogWithLongExternalIdListTest() {
     List<String> massiveIds = new List<String>();
     for (Integer i = 0; i < 17; i++) {
-      massiveIds.add('ID-TESTE-1234');
+      massiveIds.add('ID-TEST-1234');
     }
 
     Test.startTest();
@@ -405,7 +405,7 @@ public with sharing class IntegrationLogTest {
     System.assertNotEquals(
       null,
       logId,
-      'O log deveria ter sido inserido com sucesso'
+      'The log should have been inserted successfully'
     );
 
     IntegrationLog__c insertedLog = [
