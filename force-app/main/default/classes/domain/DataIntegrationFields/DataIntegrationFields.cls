@@ -260,7 +260,7 @@ global with sharing class DataIntegrationFields {
     public OrderItemParameters[] orderItemList;
 
     public OrderParameters(Order order) {
-      this.externalId = 'AGRO_EXTERNAL_INTEGRATION_ORDER_003_ENVIADO';
+      this.externalId = order.ExternalId__c;
       this.status = 'draft';
       this.effectiveDate = order.EffectiveDate;
       this.accountExternalId = order.Account.ExternalId__c;
@@ -293,7 +293,7 @@ global with sharing class DataIntegrationFields {
       this.externalId = orderItem.ExternalId__c;
       this.quantity = orderItem.Quantity;
       this.unitPrice = orderItem.UnitPrice;
-      this.orderExternalId = 'AGRO_EXTERNAL_INTEGRATION_ORDER_003_ENVIADO';
+      this.orderExternalId = orderItem.Order.ExternalId__c;
       this.pricebookEntryExternalId = orderItem.PricebookEntry.ExternalId__c;
       this.sellingPrice = orderItem.Selling_Price__c;
       this.productionCost = orderItem.Production_Cost__c;

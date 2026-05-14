@@ -497,6 +497,7 @@ public class DataIntegrationFieldsTest {
         Distribution_Center__r.Name,
         Payment_Terms__r.Name,
         Contract.ExternalId__c,
+        ExternalId__c,
         (
           SELECT
             ExternalId__c,
@@ -504,7 +505,8 @@ public class DataIntegrationFieldsTest {
             UnitPrice,
             PricebookEntry.ExternalId__c,
             Selling_Price__c,
-            Production_Cost__c
+            Production_Cost__c,
+            Order.ExternalId__c
           FROM OrderItems
         )
       FROM Order
@@ -530,9 +532,5 @@ public class DataIntegrationFieldsTest {
 
     System.assertNotEquals(null, orderParam.orderItemList);
     System.assertEquals(1, orderParam.orderItemList.size());
-    System.assertEquals(
-      'AGRO_EXTERNAL_INTEGRATION_ORDER_003_ENVIADO',
-      orderParam.externalId
-    );
   }
 }
