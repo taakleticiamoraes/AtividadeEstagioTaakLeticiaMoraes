@@ -14,7 +14,7 @@ public class DataIntegrationFieldsTest {
 
     Account acc = (Account) TestFactorySObject.getInstance()
       .createSObject(new Account());
-    acc.Name = 'Cliente Teste ' + timestamp;
+    acc.Name = 'Test Customer ' + timestamp;
     acc.ExternalId__c = 'ACC-TEST-' + timestamp;
     insert acc;
 
