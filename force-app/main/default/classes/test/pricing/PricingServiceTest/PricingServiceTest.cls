@@ -31,7 +31,7 @@ private class PricingServiceTest {
     PricingService.validateRequiredParameters(new List<OrderItem>{ oi });
     Test.stopTest();
 
-    System.assert(oi.hasErrors(), 'Deveria ter erro por Production_Cost nulo');
+    System.assert(oi.hasErrors(), 'Should have error for null Production_Cost');
   }
 
   @IsTest
@@ -43,7 +43,7 @@ private class PricingServiceTest {
     PricingService.validateRequiredParameters(new List<OrderItem>{ oi });
     Test.stopTest();
 
-    System.assert(oi.hasErrors(), 'Deveria ter erro por Shipping_Cost nulo');
+    System.assert(oi.hasErrors(), 'Should have error for null Shipping_Cost');
   }
 
   @IsTest
@@ -55,7 +55,7 @@ private class PricingServiceTest {
     PricingService.validateRequiredParameters(new List<OrderItem>{ oi });
     Test.stopTest();
 
-    System.assert(oi.hasErrors(), 'Deveria ter erro por Tax_Percentage nulo');
+    System.assert(oi.hasErrors(), 'Should have error for null Tax_Percentage');
   }
 
   @IsTest
@@ -69,7 +69,7 @@ private class PricingServiceTest {
 
     System.assert(
       oi.hasErrors(),
-      'Deveria ter erro por Margin_Percentage nulo'
+      'Should have error for null Margin_Percentage'
     );
   }
 
@@ -116,7 +116,7 @@ private class PricingServiceTest {
     Test.stopTest();
 
     for (OrderItem item : items) {
-      System.assert(!item.hasErrors(), 'Nenhum item deveria ter erro');
+      System.assert(!item.hasErrors(), 'No item should have errors');
     }
   }
 
@@ -153,7 +153,7 @@ private class PricingServiceTest {
 
     System.assert(
       oi.Discount__c > 0,
-      'Deveria calcular desconto quando venda < final'
+      'Should calculate discount when sale < final'
     );
   }
 
@@ -262,7 +262,7 @@ private class PricingServiceTest {
     System.assertNotEquals(null, oi.Final_Price__c);
     System.assert(
       oi.Final_Price__c > oi.Price_without_margin__c,
-      'Final Price deve ser maior que Price Without Margin com margem'
+      'Final Price should be greater than Price Without Margin when margin is applied'
     );
   }
 
