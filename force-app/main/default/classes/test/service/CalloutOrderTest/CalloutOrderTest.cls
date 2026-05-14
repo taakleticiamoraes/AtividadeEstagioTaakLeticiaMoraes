@@ -61,12 +61,12 @@ public with sharing class CalloutOrderTest {
     insert pricebook;
 
     /*PricebookEntry standardPBE = new PricebookEntry(
-    Pricebook2Id = Test.getStandardPricebookId(),
-    Product2Id = prod.Id,
-    UnitPrice = 10,
-    IsActive = true
-      );
-    insert standardPBE;*/
+        Pricebook2Id = Test.getStandardPricebookId(),
+        Product2Id = prod.Id,
+        UnitPrice = 10,
+        IsActive = true
+            );
+        insert standardPBE;*/
 
     PricebookEntry pbe = new PricebookEntry(
       Pricebook2Id = pricebook.Id,
@@ -77,14 +77,14 @@ public with sharing class CalloutOrderTest {
     insert pbe;
 
     /*OrderItem item = new OrderItem(
-      OrderId = testOrder.Id,
-    PricebookEntryId = pbe.Id,
-    Quantity = 10,
-    UnitPrice = 10,
-    ExternalId__c = 'ITEM-DUMMY-001',
-    DeletedProduct__c = false
-      );
-    insert item;*/
+        OrderId = testOrder.Id,
+        PricebookEntryId = pbe.Id,
+        Quantity = 10,
+        UnitPrice = 10,
+        ExternalId__c = 'ITEM-DUMMY-001',
+        DeletedProduct__c = false
+            );
+        insert item;*/
 
     IntegrationSetting__c integration = new IntegrationSetting__c(
       Name = 'IntegrationOutUsername',
@@ -307,10 +307,10 @@ public with sharing class CalloutOrderTest {
       '[' +
       '{' +
       '"hasError": true,' +
-      '"errorMessage": "Erro Cabecalho",' +
+      '"errorMessage": "Header Error",' +
       '"externalId": "ORD-001",' +
       '"items": [' +
-      '{"hasError": true, "errorMessage": "Erro Item", "externalId": "OI-001"}' +
+      '{"hasError": true, "errorMessage": "Item Error", "externalId": "OI-001"}' +
       ']' +
       '}' +
       ']';
@@ -327,8 +327,8 @@ public with sharing class CalloutOrderTest {
     Test.stopTest();
 
     System.assertNotEquals(null, calloutResponse.parsedResponses);
-    System.assert(errorMessageResult.contains('Erro Cabecalho'));
-    System.assert(errorMessageResult.contains('Erro Item'));
+    System.assert(errorMessageResult.contains('Header Error'));
+    System.assert(errorMessageResult.contains('Item Error'));
   }
 
   @IsTest
