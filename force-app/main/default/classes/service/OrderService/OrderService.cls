@@ -1,6 +1,8 @@
 public class OrderService {
   public static void validateBeforeInsert(List<Order> newList) {
     for (Order order : newList) {
+      // Ensure Total_Discount__c is not set manually on insert
+      order.Total_Discount__c = null;
       if (order.AccountId == null) {
         order.addError('Account is required.');
       }
@@ -27,6 +29,21 @@ public class OrderService {
 
     for (Order order : newList) {
       Order old = oldMap.get(order.Id);
+
+      // Prevent manual edits to Total_Discount__c; this field is calculated
+      if (!TriggerControl.isRecalculating) {
+        Decimal oldDisc = (old.Total_Discount__c == null)
+          ? 0
+          : old.Total_Discount__c;
+        Decimal newDisc = (order.Total_Discount__c == null)
+          ? 0
+          : order.Total_Discount__c;
+        if (newDisc != oldDisc) {
+          order.addError(
+            'Total Discount is calculated automatically and cannot be changed manually.'
+          );
+        }
+      }
 
       if (order.AccountId != old.AccountId) {
         order.addError('Account cannot be changed after order creation.');
@@ -97,7 +114,8 @@ public class OrderService {
         Tax_Percentage__c,
         Margin_Percentage__c,
         Selling_Price__c,
-        Quantity
+        Quantity,
+        Discount__c
       FROM OrderItem
       WHERE OrderId IN :orderIds
     ];
@@ -114,6 +132,45 @@ public class OrderService {
     PricingService.calculatePricing(items);
 
     update items;
+
+    // Calculate weighted average discount per order by quantity:
+    // avg = SUM(Discount__c * Quantity) / SUM(Quantity)
+    Map<Id, Decimal> sumDQ = new Map<Id, Decimal>();
+    Map<Id, Decimal> sumQ = new Map<Id, Decimal>();
+
+    for (OrderItem it : items) {
+      if (it.OrderId == null)
+        continue;
+      Decimal d = (it.Discount__c == null) ? 0 : it.Discount__c;
+      Decimal q = (it.Quantity == null) ? 0 : Decimal.valueOf(it.Quantity);
+      Decimal dTimesQ = d * q;
+
+      sumDQ.put(
+        it.OrderId,
+        (sumDQ.containsKey(it.OrderId) ? sumDQ.get(it.OrderId) : 0) + dTimesQ
+      );
+      sumQ.put(
+        it.OrderId,
+        (sumQ.containsKey(it.OrderId) ? sumQ.get(it.OrderId) : 0) + q
+      );
+    }
+
+    List<Order> ordersToUpdate = new List<Order>();
+    for (Id oid : sumQ.keySet()) {
+      Decimal totalQty = sumQ.get(oid);
+      if (totalQty == null || totalQty == 0)
+        continue;
+
+      Decimal weightedSum = (sumDQ.containsKey(oid) ? sumDQ.get(oid) : 0);
+      Decimal avg = weightedSum / totalQty;
+      Order o = new Order(Id = oid);
+      o.Total_Discount__c = avg.setScale(2);
+      ordersToUpdate.add(o);
+    }
+
+    if (!ordersToUpdate.isEmpty()) {
+      update ordersToUpdate;
+    }
 
     TriggerControl.isRecalculating = false;
   }
