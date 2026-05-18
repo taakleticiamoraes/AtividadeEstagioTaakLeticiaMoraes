@@ -26,11 +26,11 @@ public class OrderService {
         order.addError('Account cannot be changed after order creation.');
       }
 
-      if (old.Status == 'Activated' && !TriggerControl.ignoreActivatedCheck) {
+      if (old.Status == 'Integrated' && !TriggerControl.ignoreActivatedCheck) {
         order.addError('Cannot update an activated order.');
       }
 
-      if (old.Status != 'Activated' && order.Status == 'Activated') {
+      if (old.Status != 'Integrated' && order.Status == 'Integrated') {
         validateActivation(order);
       }
     }
@@ -126,7 +126,7 @@ public class OrderService {
         ordersToRecalculate.add(order.Id);
       }
 
-      if (old.Status != 'Activated' && order.Status == 'Activated') {
+      if (old.Status != 'Integrated' && order.Status == 'Integrated') {
         ordersToIntegrate.add((String) order.Id);
       }
     }

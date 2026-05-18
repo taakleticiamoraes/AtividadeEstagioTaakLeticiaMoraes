@@ -44,7 +44,7 @@ public class DataIntegrationFieldsTest {
     );
     insert contract;
 
-    contract.Status = 'Activated';
+    contract.Status = 'Integrated';
     update contract;
 
     Pricebook2 pricebook = new Pricebook2(
