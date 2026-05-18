@@ -14,7 +14,7 @@ public class OrderService {
       }
 
       if (order.Status != 'New') {
-        order.addError('Status should be new upon creation.');
+        order.Status = 'New';
       }
     }
   }
@@ -23,6 +23,8 @@ public class OrderService {
     List<Order> newList,
     Map<Id, Order> oldMap
   ) {
+    Set<Id> ordersCheckingProducts = new Set<Id>();
+
     for (Order order : newList) {
       Order old = oldMap.get(order.Id);
 
@@ -36,6 +38,45 @@ public class OrderService {
 
       if (old.Status != 'Integrated' && order.Status == 'Integrated') {
         validateActivation(order);
+      }
+
+      if (order.Status != old.Status) {
+        if (old.Status == 'New' && order.Status == 'Pending approval') {
+          ordersCheckingProducts.add(order.Id);
+        } else if (
+          order.Status == 'Integrated' && !TriggerControl.ignoreActivatedCheck
+        ) {
+          order.addError(
+            'You cannot manually change the status to Integrated.'
+          );
+        } else if (!TriggerControl.ignoreActivatedCheck) {
+          order.addError(
+            'The only allowed status change is from New to Pending approval.'
+          );
+        }
+      }
+    }
+
+    if (!ordersCheckingProducts.isEmpty()) {
+      Set<Id> ordersWithItems = new Set<Id>();
+      for (AggregateResult ar : [
+        SELECT OrderId
+        FROM OrderItem
+        WHERE OrderId IN :ordersCheckingProducts
+        GROUP BY OrderId
+      ]) {
+        ordersWithItems.add((Id) ar.get('OrderId'));
+      }
+
+      for (Order order : newList) {
+        if (
+          ordersCheckingProducts.contains(order.Id) &&
+          !ordersWithItems.contains(order.Id)
+        ) {
+          order.addError(
+            'Cannot submit to Approval without any order products.'
+          );
+        }
       }
     }
   }
