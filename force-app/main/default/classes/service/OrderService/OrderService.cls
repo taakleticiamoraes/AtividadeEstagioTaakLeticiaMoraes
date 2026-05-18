@@ -12,6 +12,10 @@ public class OrderService {
       if (order.Distribution_Center__c == null) {
         order.addError('Distribution Center is required.');
       }
+
+      if (order.Status != 'New') {
+        order.addError('Status should be new upon creation.');
+      }
     }
   }
 
