@@ -11,6 +11,6 @@
     <required>false</required>
     <scale>2</scale>
     <trackHistory>false</trackHistory>
-    <type>Number</type>
+    <type>Percent</type>
     <unique>false</unique>
 </CustomField>
