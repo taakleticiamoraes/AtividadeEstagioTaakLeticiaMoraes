@@ -39,6 +39,12 @@
                 LOWER(TEXT(Status)) = &quot;integration error&quot;
             )
         )
+    ),
+    NOT(
+        AND(
+            LOWER(TEXT(PRIORVALUE(Status))) = &quot;integration error&quot;,
+            LOWER(TEXT(Status)) = &quot;new&quot;
+        )
     )
 )</errorConditionFormula>
     <errorMessage

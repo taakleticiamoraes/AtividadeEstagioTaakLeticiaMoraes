@@ -56,6 +56,30 @@ public class OrderService {
         validateActivation(order);
       }
 
+      // Se está em "Integration error" e algum campo mudou (exceto Status), volta para "New"
+      if (
+        old.Status == 'Integration error' &&
+        order.Status == 'Integration error'
+      ) {
+        // Comparar sem considerar o campo Status
+        Order oldClone = old.clone(false, false);
+        Order newClone = order.clone(false, false);
+        oldClone.Status = null;
+        newClone.Status = null;
+
+        String oldJson = JSON.serialize(oldClone);
+        String newJson = JSON.serialize(newClone);
+
+        if (oldJson != newJson) {
+          order.Status = 'New';
+          System.debug(
+            'Order ' +
+              order.Id +
+              ' was reset to "New" because fields were modified'
+          );
+        }
+      }
+
       /* --- VALIDAÇÃO DE STATUS ALINHADA COM A ORG --- */
       if (order.Status != old.Status) {
         String oldStatus = old.Status.toLowerCase();
@@ -73,7 +97,11 @@ public class OrderService {
         } else if (oldStatus == 'pending approval' && newStatus == 'new') {
           // Deixa o Apex passar.
 
-          // 4. Transição permitida: Integração rodando via código do sistema
+          // 4. Transição permitida: Reset manual de Integration error para New
+        } else if (oldStatus == 'integration error' && newStatus == 'new') {
+          // Deixa o Apex passar. Usuário pode resetar manualmente.
+
+          // 5. Transição permitida: Integração rodando via código do sistema
         } else if (TriggerControl.ignoreActivatedCheck) {
           // Deixa passar livremente quando a integração estiver rodando
 
