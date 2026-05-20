@@ -394,14 +394,12 @@ public class OrderService {
           }
         }
       } else if (response != null && response.hasError) {
-        // No parsed responses but overall hasError -> mark all as error
         for (Order o : [SELECT Id FROM Order WHERE Id IN :orderIds]) {
           ordersToUpdate.add(
             new Order(Id = o.Id, Status = 'Integration Error')
           );
         }
       } else if (response != null && !response.hasError) {
-        // No parsed responses but no error -> mark all as Integrated (success with empty response list)
         for (Order o : [SELECT Id FROM Order WHERE Id IN :orderIds]) {
           ordersToUpdate.add(new Order(Id = o.Id, Status = 'Integrated'));
         }
