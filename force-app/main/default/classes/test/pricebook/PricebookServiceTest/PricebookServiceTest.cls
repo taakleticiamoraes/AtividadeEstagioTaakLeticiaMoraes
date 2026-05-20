@@ -7,14 +7,14 @@ public class PricebookServiceTest {
     Product2 product1 = (Product2) TestFactorySObject.getInstance()
       .createSObject(new Product2());
 
-    product1.Name = 'Produto Teste 1 ' + timestamp;
+    product1.Name = 'Test Product 1 ' + timestamp;
     product1.ExternalId__c = 'PROD-1-' + timestamp;
     product1.IsActive = true;
 
     Product2 product2 = (Product2) TestFactorySObject.getInstance()
       .createSObject(new Product2());
 
-    product2.Name = 'Produto Teste 2 ' + timestamp;
+    product2.Name = 'Test Product 2 ' + timestamp;
     product2.ExternalId__c = 'PROD-2-' + timestamp;
     product2.IsActive = true;
 
@@ -47,7 +47,7 @@ public class PricebookServiceTest {
 
     Id standardPbId = Test.getStandardPricebookId();
 
-    // Remove entries criados pelo trigger
+    // Remove entries created by the trigger
     List<PricebookEntry> existingEntries = [
       SELECT Id
       FROM PricebookEntry

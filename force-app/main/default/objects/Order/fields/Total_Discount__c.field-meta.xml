@@ -5,7 +5,7 @@
   >Average discount per product calculated from OrderItem.Discount__c. Field is maintained by Apex and should not be edited manually.</description>
     <externalId>false</externalId>
     <inlineHelpText
-  >Valor calculado automaticamente com base nos descontos dos itens do pedido.</inlineHelpText>
+  >Automatically calculated value based on the discounts of the order's items.</inlineHelpText>
     <label>Total Discount</label>
     <precision>18</precision>
     <required>false</required>

@@ -56,7 +56,7 @@ public class OrderService {
         validateActivation(order);
       }
 
-      // Se está em "Integration error" e algum campo mudou (exceto Status), volta para "New"
+      // If in "Integration error" and any field changed (except Status), reset to "New"
       if (
         old.Status == 'Integration error' &&
         order.Status == 'Integration error'
@@ -80,32 +80,32 @@ public class OrderService {
         }
       }
 
-      /* --- VALIDAÇÃO DE STATUS ALINHADA COM A ORG --- */
+      /* --- STATUS VALIDATION ALIGNED WITH ORG --- */
       if (order.Status != old.Status) {
         String oldStatus = old.Status.toLowerCase();
         String newStatus = order.Status.toLowerCase();
 
-        // 1. Transição permitida: Usuário envia para aprovação
+        // 1. Allowed transition: User submits for approval
         if (oldStatus == 'new' && newStatus == 'pending approval') {
           ordersCheckingProducts.add(order.Id);
 
-          // 2. Transição permitida: Automações avançando para Approved (Flow/Approval Process)
+          // 2. Allowed transition: Automations advancing to Approved (Flow/Approval Process)
         } else if (oldStatus == 'pending approval' && newStatus == 'approved') {
-          // Deixa o Apex passar. A Validation Rule da Org garante que o usuário não faça na mão.
+          // Let Apex proceed. An Org Validation Rule ensures users cannot do this manually.
 
-          // 3. Transição permitida: Gerente rejeitando o pedido (Volta para New)
+          // 3. Allowed transition: Manager rejecting the order (Back to New)
         } else if (oldStatus == 'pending approval' && newStatus == 'new') {
-          // Deixa o Apex passar.
+          // Let Apex proceed.
 
-          // 4. Transição permitida: Reset manual de Integration error para New
+          // 4. Allowed transition: Manual reset from Integration error to New
         } else if (oldStatus == 'integration error' && newStatus == 'new') {
-          // Deixa o Apex passar. Usuário pode resetar manualmente.
+          // Let Apex proceed. User may reset manually.
 
-          // 5. Transição permitida: Integração rodando via código do sistema
+          // 5. Allowed transition: Integration running via system code
         } else if (TriggerControl.ignoreActivatedCheck) {
-          // Deixa passar livremente quando a integração estiver rodando
+          // Allow freely when integration is running
 
-          // Bloqueios de segurança manuais residuais:
+          // Residual manual security locks:
         } else if (order.Status == 'Integrated') {
           order.addError(
             'You cannot manually change the status to Integrated.'
@@ -437,11 +437,11 @@ public class OrderService {
       }
 
       if (response != null && response.hasError) {
-        String msgErro = String.isBlank(response.errorMessage)
+        String msgError = String.isBlank(response.errorMessage)
           ? CalloutOrder.handlerError(response)
           : response.errorMessage;
 
-        System.debug('Failure in asynchronous integration: ' + msgErro);
+        System.debug('Failure in asynchronous integration: ' + msgError);
       } else {
         System.debug(
           'Success in asynchronous integration of Orders: ' + orderIds

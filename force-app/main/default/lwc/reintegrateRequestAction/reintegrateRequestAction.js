@@ -2,7 +2,7 @@ import { LightningElement, api } from "lwc";
 import { NotifyFieldUpdates } from "lightning/uiRecordApi";
 import runIntegrationFromLWC from "@salesforce/apex/InvocableOrderIntegration.runIntegrationFromLWC";
 
-export default class ReintegrarPedidoAction extends LightningElement {
+export default class ReintegrateOrderAction extends LightningElement {
   @api recordId;
   @api invoke() {
     runIntegrationFromLWC({ orderId: this.recordId })
@@ -10,7 +10,7 @@ export default class ReintegrarPedidoAction extends LightningElement {
         NotifyFieldUpdates([{ recordId: this.recordId }]);
       })
       .catch((error) => {
-        console.error("Erro ao disparar integração:", error);
+        console.error("Error triggering integration:", error);
       });
   }
 }

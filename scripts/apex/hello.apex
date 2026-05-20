@@ -84,7 +84,7 @@ if (!records.isEmpty()) {
 }
 
 // ACCOUNT
-records = [SELECT Id FROM Account WHERE Name LIKE 'Cliente Teste%'];
+records = [SELECT Id FROM Account WHERE Name LIKE 'Test Customer%'];
 if (!records.isEmpty()) {
   try {
     delete records;
@@ -178,7 +178,7 @@ insert groupAcc;
 
 // 5. ACCOUNT
 Account acc = new Account(
-  Name = 'Cliente Teste ' + suffix,
+  Name = 'Test Customer ' + suffix,
   CNPJ__c = '12345678000199',
   Group_Account__c = groupAcc.Id
 );
@@ -188,7 +188,7 @@ insert acc;
 Address__c addr = new Address__c(
   Account__c = acc.Id,
   City__c = city.Id,
-  Street__c = 'Rua Teste',
+  Street__c = 'Test Street',
   CEP__c = '00000000',
   Neighborhood__c = 'Centro'
 );
@@ -208,7 +208,7 @@ insert hierarchy;
 
 // 10. PRODUCT
 Product2 prod = new Product2(
-  Name = 'Produto Teste ' + suffix,
+  Name = 'Test Product ' + suffix,
   IsActive = true,
   Product_Hierarchy__c = hierarchy.Id
 );
@@ -238,7 +238,7 @@ insert pbe;
 
 // 13. ORDER
 Order ord = new Order(
-  Name = 'Pedido Teste ' + suffix,
+  Name = 'Test Order ' + suffix,
   AccountId = acc.Id,
   EffectiveDate = Date.today(),
   Status = 'Draft',
@@ -294,7 +294,7 @@ OrderItem item = new OrderItem(
 );
 insert item;
 
-// 18. VALIDAR RESULTADO
+// 18. VALIDATE RESULT
 item = [
   SELECT
     Id,
