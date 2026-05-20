@@ -30,7 +30,6 @@ public class OrderService {
     for (Order order : newList) {
       Order old = oldMap.get(order.Id);
 
-      // Prevent manual edits to Total_Discount__c; this field is calculated
       if (!TriggerControl.isRecalculating) {
         Decimal oldDisc = (old.Total_Discount__c == null)
           ? 0
@@ -57,16 +56,33 @@ public class OrderService {
         validateActivation(order);
       }
 
+      /* --- VALIDAÇÃO DE STATUS ALINHADA COM A ORG --- */
       if (order.Status != old.Status) {
-        if (old.Status == 'New' && order.Status == 'Pending approval') {
+        String oldStatus = old.Status.toLowerCase();
+        String newStatus = order.Status.toLowerCase();
+
+        // 1. Transição permitida: Usuário envia para aprovação
+        if (oldStatus == 'new' && newStatus == 'pending approval') {
           ordersCheckingProducts.add(order.Id);
-        } else if (
-          order.Status == 'Integrated' && !TriggerControl.ignoreActivatedCheck
-        ) {
+
+          // 2. Transição permitida: Automações avançando para Approved (Flow/Approval Process)
+        } else if (oldStatus == 'pending approval' && newStatus == 'approved') {
+          // Deixa o Apex passar. A Validation Rule da Org garante que o usuário não faça na mão.
+
+          // 3. Transição permitida: Gerente rejeitando o pedido (Volta para New)
+        } else if (oldStatus == 'pending approval' && newStatus == 'new') {
+          // Deixa o Apex passar.
+
+          // 4. Transição permitida: Integração rodando via código do sistema
+        } else if (TriggerControl.ignoreActivatedCheck) {
+          // Deixa passar livremente quando a integração estiver rodando
+
+          // Bloqueios de segurança manuais residuais:
+        } else if (order.Status == 'Integrated') {
           order.addError(
             'You cannot manually change the status to Integrated.'
           );
-        } else if (!TriggerControl.ignoreActivatedCheck) {
+        } else {
           order.addError(
             'The only allowed status change is from New to Pending approval.'
           );
@@ -142,7 +158,7 @@ public class OrderService {
       if (it.OrderId == null)
         continue;
       Decimal d = (it.Discount__c == null) ? 0 : it.Discount__c;
-      Decimal q = (it.Quantity == null) ? 0 : Decimal.valueOf(it.Quantity);
+      Decimal q = (it.Quantity == null) ? 0 : it.Quantity;
       Decimal dTimesQ = d * q;
 
       sumDQ.put(
@@ -228,7 +244,7 @@ public class OrderService {
         ordersToRecalculate.add(order.Id);
       }
 
-      if (old.Status != 'Integrated' && order.Status == 'Integrated') {
+      if (old.Status != 'Approved' && order.Status == 'Approved') {
         ordersToIntegrate.add((String) order.Id);
       }
     }
@@ -249,7 +265,150 @@ public class OrderService {
         orderIds
       );
 
-      if (response.hasError) {
+      System.debug(
+        'OrderService.integrateOrders: response = ' + JSON.serialize(response)
+      );
+      System.debug(
+        'OrderService.integrateOrders: response.hasError = ' +
+        (response != null ? String.valueOf(response.hasError) : 'null')
+      );
+      System.debug('OrderService.integrateOrders: orderIds = ' + orderIds);
+
+      // Build a unified list of response wrappers (supports single or multiple)
+      List<DataIntegrationFields.ResponseParametersWrapper> responseList = new List<DataIntegrationFields.ResponseParametersWrapper>();
+      if (response == null) {
+        // nothing
+      } else if (response.parsedResponses != null) {
+        responseList = response.parsedResponses;
+      } else if (response.parsedResponse != null) {
+        responseList.add(response.parsedResponse);
+      }
+
+      System.debug(
+        'OrderService.integrateOrders: responseList size = ' +
+        responseList.size()
+      );
+      System.debug(
+        'OrderService.integrateOrders: responseList = ' +
+        JSON.serialize(responseList)
+      );
+
+      List<Order> ordersToUpdate = new List<Order>();
+
+      if (!responseList.isEmpty()) {
+        // Map externalIds to response wrappers
+        Set<String> externalIds = new Set<String>();
+        for (DataIntegrationFields.ResponseParametersWrapper r : responseList) {
+          if (r.externalId != null)
+            externalIds.add(r.externalId);
+        }
+
+        System.debug(
+          'OrderService.integrateOrders: externalIds = ' + externalIds
+        );
+
+        if (!externalIds.isEmpty()) {
+          Map<String, Order> ordersByExternal = new Map<String, Order>();
+          for (Order o : [
+            SELECT Id, ExternalId__c, Status
+            FROM Order
+            WHERE ExternalId__c IN :externalIds
+          ]) {
+            ordersByExternal.put(o.ExternalId__c, o);
+          }
+
+          System.debug(
+            'OrderService.integrateOrders: ordersByExternal size = ' +
+            ordersByExternal.size()
+          );
+
+          for (
+            DataIntegrationFields.ResponseParametersWrapper r : responseList
+          ) {
+            String ext = r.externalId;
+            if (ext == null)
+              continue;
+            Order base = ordersByExternal.get(ext);
+            System.debug(
+              'OrderService.integrateOrders: Processing externalId=' +
+                ext +
+                ', order found=' +
+                (base != null)
+            );
+            if (base == null)
+              continue;
+
+            String newStatus = (r.hasError
+              ? 'Integration Error'
+              : 'Integrated');
+            System.debug(
+              'OrderService.integrateOrders: Setting status from ' +
+                base.Status +
+                ' to ' +
+                newStatus +
+                ' for order ' +
+                base.Id
+            );
+
+            // If child items contain errors, mark as error as well
+            if (!r.hasError && r.items != null) {
+              for (
+                DataIntegrationFields.ResponseParametersWrapper item : r.items
+              ) {
+                if (item.hasError) {
+                  newStatus = 'Integration Error';
+                  break;
+                }
+              }
+            }
+
+            ordersToUpdate.add(new Order(Id = base.Id, Status = newStatus));
+          }
+        }
+      } else if (response != null && response.hasError) {
+        // No parsed responses but overall hasError -> mark all as error
+        for (Order o : [SELECT Id FROM Order WHERE Id IN :orderIds]) {
+          ordersToUpdate.add(
+            new Order(Id = o.Id, Status = 'Integration Error')
+          );
+        }
+      } else if (response != null && !response.hasError) {
+        // No parsed responses but no error -> mark all as Integrated (success with empty response list)
+        for (Order o : [SELECT Id FROM Order WHERE Id IN :orderIds]) {
+          ordersToUpdate.add(new Order(Id = o.Id, Status = 'Integrated'));
+        }
+        System.debug(
+          'OrderService.integrateOrders: Marked orders as Integrated due to successful response with empty responseList'
+        );
+      }
+
+      System.debug(
+        'OrderService.integrateOrders: ordersToUpdate size = ' +
+        ordersToUpdate.size()
+      );
+
+      if (!ordersToUpdate.isEmpty()) {
+        TriggerControl.ignoreActivatedCheck = true;
+        try {
+          update ordersToUpdate;
+          System.debug(
+            'OrderService.integrateOrders: Successfully updated ' +
+              ordersToUpdate.size() +
+              ' orders'
+          );
+        } catch (Exception updateEx) {
+          System.debug(
+            'OrderService.integrateOrders: Failed to update orders: ' +
+              updateEx.getMessage() +
+              ' - ' +
+              updateEx.getStackTraceString()
+          );
+        } finally {
+          TriggerControl.ignoreActivatedCheck = false;
+        }
+      }
+
+      if (response != null && response.hasError) {
         String msgErro = String.isBlank(response.errorMessage)
           ? CalloutOrder.handlerError(response)
           : response.errorMessage;

@@ -188,6 +188,15 @@ public with sharing class IntegrationLogTest {
       logId,
       'Log ID should be created even with errors'
     );
+
+    IntegrationLog__c createdLog = [
+      SELECT ErrorMessage__c, Status__c
+      FROM IntegrationLog__c
+      WHERE Id = :logId
+      LIMIT 1
+    ];
+    System.assertEquals('Error', createdLog.Status__c);
+    System.assertEquals(errorMessage, createdLog.ErrorMessage__c);
     Test.stopTest();
   }
 

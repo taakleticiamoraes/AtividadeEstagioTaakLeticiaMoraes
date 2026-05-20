@@ -27,7 +27,16 @@
             LOWER(TEXT(PRIORVALUE(Status))) = &quot;approved&quot;,
             OR(
                 LOWER(TEXT(Status)) = &quot;integrated&quot;,
-                LOWER(TEXT(Status)) = &quot;integration error"
+                LOWER(TEXT(Status)) = &quot;integration error&quot;
+            )
+        )
+    ),
+    NOT(
+        AND(
+            LOWER(TEXT(PRIORVALUE(Status))) = &quot;integration error&quot;,
+            OR(
+                LOWER(TEXT(Status)) = &quot;integrated&quot;,
+                LOWER(TEXT(Status)) = &quot;integration error&quot;
             )
         )
     )

@@ -41,6 +41,19 @@ public with sharing class TestUtility {
     return body;
   }
 
+  public static String getBodyResponseSuccess() {
+    String body =
+      '[ { ' +
+      '"hasError": false,' +
+      '"errorMessage": "",' +
+      '"salesforceId": "0123456789",' +
+      '"externalId": "TEST-ORDER-001",' +
+      '"sobjectType": "Orderd"' +
+      ' } ]';
+
+    return body;
+  }
+
   public static String getBodyResponseError() {
     return '{}';
   }

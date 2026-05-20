@@ -113,12 +113,41 @@ public with sharing class CalloutOrderTest {
       HttpCalloutMock.class,
       new MockHttpResponse(
         true,
-        TestUtility.getBodyResponse(),
-        TestUtility.getBodyResponse()
+        TestUtility.getBodyResponseSuccess(),
+        TestUtility.getBodyResponseSuccess()
       )
     );
-    CalloutOrder.executeCalloutOrder(orderIdList);
+    // Call OrderService.integrateOrders instead of CalloutOrder.executeCalloutOrder
+    // because the status update logic has been moved to OrderService
+    OrderService.integrateOrders(orderIdList);
     Test.stopTest();
+
+    Order updatedOrder = [
+      SELECT Status, IntegrationLogOutbound__c
+      FROM Order
+      WHERE Id = :orderIdList[0]
+    ];
+
+    // Debug: Check what values we got
+    System.debug('DEBUG: Order Status = ' + updatedOrder.Status);
+    System.debug(
+      'DEBUG: IntegrationLogOutbound__c = ' +
+      updatedOrder.IntegrationLogOutbound__c
+    );
+
+    // Verify integration log was created (this should pass if callout was executed)
+    System.assertNotEquals(
+      null,
+      updatedOrder.IntegrationLogOutbound__c,
+      'Integration log should be created'
+    );
+
+    // Verify status was updated
+    System.assertEquals(
+      'Integrated',
+      updatedOrder.Status,
+      'Order status should be Integrated after successful integration'
+    );
   }
 
   @IsTest
@@ -139,8 +168,8 @@ public with sharing class CalloutOrderTest {
         TestUtility.getBodyResponse()
       )
     );
-    update updateOrder;
-    CalloutOrder.executeCalloutOrder(orderIdList);
+    // Call OrderService.integrateOrders instead of CalloutOrder.executeCalloutOrder
+    OrderService.integrateOrders(orderIdList);
     Test.stopTest();
   }
 
