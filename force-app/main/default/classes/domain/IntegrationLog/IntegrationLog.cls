@@ -37,6 +37,7 @@ public with sharing class IntegrationLog {
       attachmentOUT,
       payloadIN,
       payloadOUT,
+      errorMessage,
       endpoint,
       hasAnyErrors,
       datetimeNow,
@@ -88,6 +89,7 @@ public with sharing class IntegrationLog {
     Boolean attachmentOUT,
     String payloadIN,
     String payloadOUT,
+    String errorMessage,
     String endpoint,
     Boolean hasAnyErrors,
     Datetime datetimeNow,
@@ -111,7 +113,7 @@ public with sharing class IntegrationLog {
       PayloadOUT__c = (attachmentOUT ? '' : payloadOUT),
       ExecutionDate__c = datetimeNow,
       Status__c = (hasAnyErrors ? 'Error' : 'Success'),
-      ErrorMessage__c = '',
+      ErrorMessage__c = errorMessage,
       HasDeleted__c = hasDeleted,
       Order__c = (relatedOrder != null ? relatedOrder.Id : null)
     );
